@@ -1,0 +1,14 @@
+package com.example.testspring.repository;
+
+import com.example.testspring.entity.Account;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface AccountRepository extends JpaRepository<Account,Long> {
+
+    boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
+    Optional<Account> findByEmail(String email);
+    Optional<Account> findByPhone(String phone);
+}

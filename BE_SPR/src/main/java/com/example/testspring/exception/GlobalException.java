@@ -1,0 +1,55 @@
+package com.example.testspring.exception;
+
+import com.example.testspring.dto.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+@RestControllerAdvice
+@Slf4j
+public class GlobalException  {
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAppException(AppException e) {
+        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
+                .body(ApiResponse.<Object>builder()
+                        .code(e.getErrorCode().getCode())
+                        .message(e.getErrorCode().getMessage())
+                        .data(null)
+                        .build());
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Map<String, List<String>>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        Map<String, List<String>> errors = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        FieldError::getField,
+                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
+                ));
+        log.warn("Validation Errors: {}", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.<Map<String,List<String>>>builder()
+                        .code(400)
+                        .message("Validate failed")
+                        .data(errors)
+                        .build());
+    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Object>> handleException(Exception e) {
+        log.error("AppException: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.<Object>builder()
+                        .code(500)
+                        .message("Server Error")
+                        .data(null)
+                        .build());
+    }
+}

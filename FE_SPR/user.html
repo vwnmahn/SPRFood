@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SPRFood - Đặt món & giao tận nơi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="user.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-container">
+            <div class="logo-area">
+                <a href="user.html" class="logo">SPRFood</a>
+                <span class="tagline">Giao tận nơi, ngon trọn vị</span>
+            </div>
+            <div class="header-actions">
+                <div class="location-selector" id="locationSelector">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="selectedLocation">Đang xác định...</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <button class="lang-switch"><i class="fas fa-globe"></i> Tiếng Việt</button>
+                
+                <!-- Phần đăng nhập/người dùng -->
+                <div id="userSection" class="user-section">
+                    <a href="login.html" class="btn-login" id="loginBtn">
+                        <i class="fas fa-user"></i> Đăng nhập
+                    </a>
+                    <div class="user-dropdown" id="userDropdown" style="display: none;">
+                        <button class="user-avatar" id="userAvatarBtn">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userNameDisplay"></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <a href="#" id="userProfileLink"><i class="fas fa-user"></i> Tài khoản</a>
+                            <a href="#" id="userOrdersLink"><i class="fas fa-clipboard-list"></i> Đơn hàng</a>
+                            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="cart.html" class="btn-cart" id="cartBtnLink">
+                    <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal chọn vị trí -->
+    <div class="location-modal" id="locationModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-location-dot"></i> Chọn vị trí của bạn</h3>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="location-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="locationSearchInput" placeholder="Tìm quận/huyện...">
+                </div>
+                <div class="current-location">
+                    <button id="useCurrentLocationBtn"><i class="fas fa-crosshairs"></i> Sử dụng vị trí hiện tại</button>
+                </div>
+                <div class="location-tabs">
+                    <button class="tab-btn active" data-tab="city">Thành phố</button>
+                    <button class="tab-btn" data-tab="district">Quận/Huyện</button>
+                </div>
+                <div class="tab-content active" id="cityTab">
+                    <div class="city-list" id="cityList"></div>
+                </div>
+                <div class="tab-content" id="districtTab">
+                    <div class="district-list" id="districtList"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-confirm" id="confirmLocation">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <section class="hero-filter">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Khám phá <span class="highlight">ẩm thực</span> mọi miền</h1>
+                <p>Thường thức món ăn cùng SPRFood phục vụ bạn mỗi ngày</p>
+            </div>
+            <div class="filter-card">
+                <div class="filter-row">
+                    <div class="filter-group search-group">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Tìm quán, món ăn,...">
+                        <div class="search-suggestions" id="suggestions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="stats-bar">
+        <div class="container">
+            <div class="stats-info">
+                <span><i class="fas fa-store"></i> <span id="totalCount">0</span> địa điểm</span>
+                <span><i class="fas fa-clock"></i> 00:00 - 23:59</span>
+                <span id="locationDisplay" class="location-display"><i class="fas fa-map-pin"></i> <span>Đang tải...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="food-category-section">
+        <div class="container">
+            <h3><i class="fas fa-utensils"></i> Danh mục món ăn</h3>
+            <div class="food-category-scroll" id="foodCategoryList">
+                <button class="food-category-chip active" data-category="all">🍽️ Tất cả</button>
+                <button class="food-category-chip" data-category="food">🍔 Đồ ăn</button>
+                <button class="food-category-chip" data-category="drink">🥤 Nước</button>
+                <button class="food-category-chip" data-category="vegan">🌱 Đồ chay</button>
+                <button class="food-category-chip" data-category="cake">🎂 Bánh kem</button>
+                <button class="food-category-chip" data-category="fastfood">🍕 Pizza/Burger</button>
+                <button class="food-category-chip" data-category="noodle">🍜 Mì phở</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="restaurant-list">
+        <div class="container">
+            <div class="section-header">
+                <h2>✨ Gợi ý hôm nay</h2>
+                <span class="result-hint" id="resultHint">Đang tải...</span>
+            </div>
+            <div class="restaurant-grid" id="restaurantGrid"></div>
+            <div id="pagination" class="pagination"></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-logo">
+                <i class="fas fa-utensil-spoon"></i>
+                <span>SPRFood</span>
+            </div>
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-question-circle"></i> Trợ giúp</a>
+                <a href="#"><i class="fas fa-file-contract"></i> Điều khoản</a>
+                <a href="#"><i class="fas fa-shield-alt"></i> Bảo mật</a>
+                <a href="#"><i class="fas fa-envelope"></i> Liên hệ</a>
+            </div>
+            <div class="footer-copyright">
+                <p>© 2025 SPRFood. Tất cả quyền được bảo lưu.</p>
+                <p class="footer-slogan">Mang ẩm thực chất lượng đến mọi nhà</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="user.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SPRFood - Đăng nhập</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <div class="auth-card">
+                <!-- Decorative elements -->
+                <div class="deco-circle deco-1"></div>
+                <div class="deco-circle deco-2"></div>
+                <div class="deco-circle deco-3"></div>
+                
+                <div class="auth-header">
+                    <div class="brand-icon">
+                        <i class="fas fa-utensil-spoon"></i>
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h1>SPR<span>Food</span></h1>
+                    <p>Trải nghiệm ẩm thực đẳng cấp</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">Đăng nhập</button>
+                    <button class="tab-btn" data-tab="register">Đăng ký</button>
+                </div>
+
+                <!-- Login Form -->
+                <div class="tab-pane active" id="loginPane">
+                    <form id="loginForm">
+                        <div class="input-group">
+                            <i class="fas fa-at"></i>
+                            <input type="text" id="loginIdentifier" placeholder="Email hoặc số điện thoại">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="loginPassword" placeholder="Mật khẩu">
+                            <button type="button" class="toggle-password" data-target="loginPassword">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="rememberMe">
+                                <span class="checkmark"></span>
+                                Ghi nhớ đăng nhập
+                            </label>
+                            <a href="#" id="forgotPasswordLink">Quên mật khẩu?</a>
+                        </div>
+                        <button type="submit" class="auth-btn">
+                            <span>Đăng nhập</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                    <div class="auth-divider">
+                        <span>Hoặc</span>
+                    </div>
+                    <div class="social-login">
+                        <button class="social-btn google" id="googleLogin">
+                            <i class="fab fa-google"></i>
+                            <span>Google</span>
+                        </button>
+                        <button class="social-btn apple" id="appleLogin">
+                            <i class="fab fa-apple"></i>
+                            <span>Apple</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div class="tab-pane" id="registerPane">
+                    <form id="registerForm">
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="regFullName" placeholder="Họ và tên">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="regEmail" placeholder="Email">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="regPhone" placeholder="Số điện thoại">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="regPassword" placeholder="Mật khẩu">
+                            <button type="button" class="toggle-password" data-target="regPassword">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-check-circle"></i>
+                            <input type="password" id="regConfirmPassword" placeholder="Xác nhận mật khẩu">
+                            <button type="button" class="toggle-password" data-target="regConfirmPassword">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                        <div class="terms-checkbox">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="termsAgree">
+                                <span class="checkmark"></span>
+                                Tôi đồng ý với <a href="#">Điều khoản</a>
+                            </label>
+                        </div>
+                        <button type="submit" class="auth-btn">
+                            <span>Tạo tài khoản</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="auth-footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-utensil-spoon"></i>
+                    <span>SPRFood</span>
+                </div>
+                <div class="footer-links">
+                    <a href="#"><i class="fas fa-question-circle"></i> Trợ giúp</a>
+                    <a href="#"><i class="fas fa-file-contract"></i> Điều khoản</a>
+                    <a href="#"><i class="fas fa-shield-alt"></i> Bảo mật</a>
+                    <a href="#"><i class="fas fa-envelope"></i> Liên hệ</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                </div>
+                <div class="footer-copyright">
+                    <p>© 2025 SPRFood. Tất cả quyền được bảo lưu.</p>
+                    <p class="footer-slogan">Mang ẩm thực chất lượng đến mọi nhà</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal" id="forgotModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Khôi phục mật khẩu</h3>
+                <button class="modal-close" id="closeForgotModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Nhập email hoặc số điện thoại đã đăng ký, chúng tôi sẽ gửi hướng dẫn khôi phục.</p>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="text" id="forgotIdentifier" placeholder="Email hoặc Số điện thoại">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" id="cancelForgot">Hủy</button>
+                <button class="btn-confirm" id="sendResetLink">Gửi yêu cầu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="login.js"></script>
+</body>
+</html>
