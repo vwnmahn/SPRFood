@@ -45,10 +45,3 @@ Project được xây dựng nhằm mục đích học tập và thực hành ph
 
 ---
 
-## 🐳 Chạy MySQL bằng Docker
-```bash
-docker run -d \
-  --name mysql-sprfood \
-  -e MYSQL_ROOT_PASSWORD=123456 \
-  -p 3306:3306 \
-  mysql:8
