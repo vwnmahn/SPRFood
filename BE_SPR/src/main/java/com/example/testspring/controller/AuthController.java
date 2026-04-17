@@ -1,14 +1,94 @@
 package com.example.testspring.controller;
 
+import com.example.testspring.dto.*;
 import com.example.testspring.service.AuthService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth")
 public class AuthController {
     private final AuthService authService;
 
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody @Valid RegisterRequest registerRequest) {
+        AuthResponse result = authService.register(registerRequest);
+        return ResponseEntity.ok(
+                ApiResponse.<AuthResponse>builder()
+                        .code(200)
+                        .message("Register success!")
+                        .data(result)
+                        .build()
+        );
+    }
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> loginUser(@RequestBody @Valid LoginRequest loginRequest) {
+        AuthResponse result = authService.loginUser(loginRequest);
+        return ResponseEntity.ok(
+                ApiResponse.<AuthResponse>builder()
+                        .code(200)
+                        .message("Login success!")
+                        .data(result)
+                        .build()
+        );
+    }
+    @PostMapping("/login/admin")
+    public ResponseEntity<ApiResponse<AuthResponse>> loginAdmin(@RequestBody @Valid LoginRequest loginRequest) {
+        AuthResponse result = authService.loginAdmin(loginRequest);
+        return ResponseEntity.ok(
+                ApiResponse.<AuthResponse>builder()
+                        .code(200)
+                        .message("Login success!")
+                        .data(result)
+                        .build()
+        );
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<?>> logout(@RequestHeader("Authorization") String token) {
+        authService.logout(token);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .code(200)
+                        .message("Logout success !")
+                        .build()
+        );
+    }
+    @GetMapping("/users/online")
+    public ResponseEntity<ApiResponse<List<AccountDTO>>> getOnlineUsers() {
+        List<AccountDTO> onlineUsers = authService.getOnlineUsers();
+        return ResponseEntity.ok(
+                ApiResponse.<List<AccountDTO>>builder()
+                        .code(200)
+                        .message("Get Users Online success!")
+                        .data(onlineUsers)
+                        .build()
+        );
+    }
+    @PutMapping("/users/{id}")
+    public ResponseEntity<ApiResponse<AuthResponse>> updateUser(@PathVariable @Positive Long id, @RequestBody @Valid AccountUpdate accountUpdate) {
+        AuthResponse result = authService.updateInfo(id, accountUpdate);
+        return ResponseEntity.ok(
+                ApiResponse.<AuthResponse>builder()
+                        .code(200)
+                        .message("Update success!")
+                        .data(result)
+                        .build()
+        );
+    }
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<?>> deleteUser(@RequestHeader("Authorization") String token) {
+        authService.deleteMyAccount(token);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .code(200)
+                        .message("Deleted success!")
+                        .build()
+        );
+    }
 }

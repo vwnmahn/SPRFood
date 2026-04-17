@@ -1,16 +1,19 @@
 package com.example.testspring.service;
 
-import com.example.testspring.dto.AuthResponse;
-import com.example.testspring.dto.LoginRequest;
-import com.example.testspring.dto.RegisterRequest;
-import com.example.testspring.entity.Role;
+import com.example.testspring.dto.*;
+import com.example.testspring.entity.RoleName;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface AuthService {
-    public AuthResponse loginCommon(String identifier, String password, boolean  isUserLogin);
-    public void logout();
-    public AuthResponse register(RegisterRequest registerRequest);
-    public AuthResponse loginUser(LoginRequest loginRequest);
-    public AuthResponse loginAdmin(LoginRequest loginRequest);
+    AuthResponse loginCommon(String identifier, String password, RoleName requiredRole);
+    AuthResponse loginUser(LoginRequest loginRequest);
+    AuthResponse loginAdmin(LoginRequest loginRequest);
+    AuthResponse register(RegisterRequest registerRequest);
+    void logout(String token);
+    List<AccountDTO> getOnlineUsers();
+    AuthResponse updateInfo(Long id,AccountUpdate accountUpdate);
+    void deleteMyAccount(String token);
 }

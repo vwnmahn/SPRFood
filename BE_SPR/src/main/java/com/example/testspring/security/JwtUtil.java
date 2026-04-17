@@ -1,31 +1,30 @@
 package com.example.testspring.security;
 
+import com.example.testspring.exception.AppException;
+import com.example.testspring.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expiration}")
-    private Long expiration;
+    private long expiration;
     private SecretKey secretKey;
-    private static final String ISSUER = "testspring-api";
+    public static final String ISSUER = "testspring-api";
     private static final String ROLE_KEY = "roles";
     @PostConstruct
     public void init() {
@@ -35,81 +34,72 @@ public class JwtUtil {
         Instant now = Instant.now();
         return Jwts.builder()
                 .setSubject(accountId.toString())
-                .claim(ROLE_KEY,roles)
+                .claim(ROLE_KEY, new ArrayList<>(roles))
                 .setIssuer(ISSUER)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusMillis(expiration)))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
-    public String extractToken(String token) {
-        if(token != null && token.startsWith("Bearer ")) {
-            return token.substring(7);
+    private String extract(String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new JwtException("Invalid Authorization header");
         }
-        return null;
+        return token.substring(7);
     }
-    public Claims parseToken(String token) {
-        String rawToken = extractToken(token);
-        if(rawToken == null) {
-            throw new JwtException("Invalid Jwt token format");
-        }
+    private Claims parseToken(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
-                .parseClaimsJws(rawToken).getBody();
+                .parseClaimsJws(extract(token))
+                .getBody();
     }
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token){
         try{
             Claims claims = parseToken(token);
             return ISSUER.equals(claims.getIssuer())
+                    && claims.getSubject() != null
                     && !isExpiredToken(claims);
         }
-        catch (JwtException | IllegalArgumentException e) {
+        catch (JwtException | IllegalArgumentException e){
             return false;
         }
     }
-    public boolean isExpiredToken(Claims claims) {
+    private boolean isExpiredToken(Claims claims){
         return claims.getExpiration() == null
                 || claims.getExpiration().before(new Date());
     }
-    public Long getAccountId(String token) {
+    public Long getAccountId(String token){
         try{
             return Long.parseLong(parseToken(token).getSubject());
         }
-        catch (JwtException | IllegalArgumentException e) {
-            return null;
+        catch (JwtException | IllegalArgumentException e){
+            throw new AppException(ErrorCode.INVALID_TOKEN);
         }
     }
-    @SuppressWarnings("unchecked")
     public Set<String> getRoles(String token) {
-        try{
-            List<String> raw=parseToken(token).get(ROLE_KEY,List.class);
-            if(raw==null)
+        try {
+            Claims claims = parseToken(token);
+            Object raw = claims.get(ROLE_KEY);
+            if (!(raw instanceof List<?> list)) {
                 return Collections.emptySet();
-            Set<String> roles=new HashSet<>();
-            for(Object o:raw) {
-                roles.add(String.valueOf(o));
             }
-            return roles;
-        }
-        catch (JwtException | IllegalArgumentException e) {
-            return Collections.emptySet();
-        }
-    }
-    public Long getExpiration(String token) {
-        try{
-            Date expiration=parseToken(token).getExpiration();
-            return expiration!=null?expiration.getTime():null;
-        }
-        catch (JwtException | IllegalArgumentException e) {
-            return null;
+            return list.stream()
+                    .filter(Objects::nonNull)
+                    .map(String::valueOf)
+                    .collect(Collectors.toSet());
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
         }
     }
-    public boolean isExpired(String token) {
+    public Long getExpiration(){
+        return expiration;
+    }
+    public boolean isExpired(String token){
         try{
             return isExpiredToken(parseToken(token));
         }
-        catch (JwtException | IllegalArgumentException e) {
+        catch (JwtException | IllegalArgumentException e){
             return true;
         }
     }

@@ -2,23 +2,26 @@ package com.example.testspring.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
+import lombok.Setter;
 
 import java.util.Set;
 
+
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "role")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="role_id",nullable = false)
     private Long id;
     @Enumerated(EnumType.STRING)
-    @Column(name = "role_name",nullable = true)
-    private RoleName name;
+    private RoleName roleName;
     @ManyToMany(mappedBy = "roles")
     private Set<Account> accounts;
 }

@@ -15,7 +15,7 @@ public class CustomAuth implements AuthenticationEntryPoint {
                          AuthenticationException authException)
             throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json;charset=utf-8");
-        response.getWriter().write("\"message\":\"Unauthorized\"");
+        response.setContentType("application/json, charset=utf-8");
+        response.getWriter().write("Unauthorized");
     }
 }
