@@ -1,5 +1,6 @@
 package com.example.testspring.entity;
 
 public enum RoleName {
-    USER,ADMIN
+    ROLE_USER,
+    ROLE_ADMIN
 }

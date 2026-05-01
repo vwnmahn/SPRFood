@@ -1,6 +1,16 @@
 
 // GIỎ HÀNG - LOCALSTORAGE
-
+// Thêm nút trang chủ vào header
+document.addEventListener('DOMContentLoaded', () => {
+    const headerActions = document.querySelector('.header-actions');
+    if (headerActions && !document.querySelector('.btn-home')) {
+        const homeBtn = document.createElement('a');
+        homeBtn.href = 'user.html';
+        homeBtn.className = 'btn-home';
+        homeBtn.innerHTML = '<i class="fas fa-home"></i> Trang chủ';
+        headerActions.insertBefore(homeBtn, headerActions.firstChild);
+    }
+});
 const currentRestaurant = {
     id: 6,
     name: "Phở 10 Lý Quốc Sư",

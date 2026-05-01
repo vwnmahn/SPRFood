@@ -24,7 +24,7 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
     private SecretKey secretKey;
-    public static final String ISSUER = "testspring-api";
+    public static final String ISSUER = "test-api";
     private static final String ROLE_KEY = "roles";
     @PostConstruct
     public void init() {

@@ -14,7 +14,6 @@
     <div class="auth-wrapper">
         <div class="auth-container">
             <div class="auth-card">
-                <!-- Decorative elements -->
                 <div class="deco-circle deco-1"></div>
                 <div class="deco-circle deco-2"></div>
                 <div class="deco-circle deco-3"></div>
@@ -33,7 +32,7 @@
                     <button class="tab-btn" data-tab="register">Đăng ký</button>
                 </div>
 
-                <!-- Login Form -->
+                <!-- Form Đăng nhập -->
                 <div class="tab-pane active" id="loginPane">
                     <form id="loginForm">
                         <div class="input-group">
@@ -68,38 +67,50 @@
                             <i class="fab fa-google"></i>
                             <span>Google</span>
                         </button>
-                        <button class="social-btn apple" id="appleLogin">
-                            <i class="fab fa-apple"></i>
-                            <span>Apple</span>
+                        <button class="social-btn facebook" id="facebookLogin">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Register Form -->
+                <!-- Form Đăng ký - CẬP NHẬT ĐẦY ĐỦ TRƯỜNG -->
                 <div class="tab-pane" id="registerPane">
                     <form id="registerForm">
                         <div class="input-group">
                             <i class="fas fa-user"></i>
-                            <input type="text" id="regFullName" placeholder="Họ và tên">
+                            <input type="text" id="regUsername" placeholder="Tên đăng nhập *">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="regFirstName" placeholder="Họ và tên đệm *">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="regLastName" placeholder="Tên *">
                         </div>
                         <div class="input-group">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" id="regEmail" placeholder="Email">
+                            <input type="email" id="regEmail" placeholder="Email *">
                         </div>
                         <div class="input-group">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" id="regPhone" placeholder="Số điện thoại">
+                            <input type="tel" id="regPhone" placeholder="Số điện thoại *">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="regAddress" placeholder="Địa chỉ *">
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="regPassword" placeholder="Mật khẩu">
+                            <input type="password" id="regPassword" placeholder="Mật khẩu *">
                             <button type="button" class="toggle-password" data-target="regPassword">
                                 <i class="fas fa-eye-slash"></i>
                             </button>
                         </div>
                         <div class="input-group">
                             <i class="fas fa-check-circle"></i>
-                            <input type="password" id="regConfirmPassword" placeholder="Xác nhận mật khẩu">
+                            <input type="password" id="regConfirmPassword" placeholder="Xác nhận mật khẩu *">
                             <button type="button" class="toggle-password" data-target="regConfirmPassword">
                                 <i class="fas fa-eye-slash"></i>
                             </button>
@@ -123,21 +134,11 @@
         <!-- Footer -->
         <footer class="auth-footer">
             <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-utensil-spoon"></i>
-                    <span>SPRFood</span>
-                </div>
                 <div class="footer-links">
                     <a href="#"><i class="fas fa-question-circle"></i> Trợ giúp</a>
                     <a href="#"><i class="fas fa-file-contract"></i> Điều khoản</a>
                     <a href="#"><i class="fas fa-shield-alt"></i> Bảo mật</a>
                     <a href="#"><i class="fas fa-envelope"></i> Liên hệ</a>
-                </div>
-                <div class="footer-social">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
                 </div>
                 <div class="footer-copyright">
                     <p>© 2025 SPRFood. Tất cả quyền được bảo lưu.</p>
@@ -147,7 +148,7 @@
         </footer>
     </div>
 
-    <!-- Forgot Password Modal -->
+    <!-- Modal Quên mật khẩu -->
     <div class="modal" id="forgotModal">
         <div class="modal-overlay"></div>
         <div class="modal-card">

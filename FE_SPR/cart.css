@@ -76,7 +76,7 @@ body {
     font-weight: 500;
     padding: 8px 16px;
     border-radius: 40px;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
 }
 
 .back-home:hover {
@@ -116,15 +116,6 @@ body {
     border-bottom: 1px solid var(--gray-border);
     gap: 16px;
     flex-wrap: wrap;
-    transition: background 0.2s;
-}
-
-.cart-item:hover {
-    background: #fef9f7;
-}
-
-.cart-item:last-child {
-    border-bottom: none;
 }
 
 .cart-item-img {
@@ -136,7 +127,6 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 36px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .cart-item-info {
@@ -185,7 +175,7 @@ body {
     cursor: pointer;
     font-weight: bold;
     font-size: 16px;
-    transition: all 0.2s;
+    transition: all 0.1s ease;
 }
 
 .qty-btn:hover {
@@ -214,13 +204,12 @@ body {
     cursor: pointer;
     font-size: 18px;
     padding: 8px;
-    transition: all 0.2s;
+    transition: all 0.1s ease;
     border-radius: 50%;
 }
 
 .delete-btn:hover {
     background: #fee2e0;
-    transform: scale(1.1);
 }
 
 /* Cart Summary */
@@ -266,16 +255,17 @@ body {
     border-radius: 40px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
 }
 
 .clear-cart-btn:hover {
     background: #e74c3c;
     color: white;
 }
-
+/* Checkout Button */
 .checkout-btn {
-    padding: 14px 32px;
+    width: 100%;
+    padding: 14px 24px;
     background: var(--primary);
     color: white;
     border: none;
@@ -283,12 +273,17 @@ body {
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
+    margin-top: 16px;
 }
 
 .checkout-btn:hover {
     background: var(--primary-dark);
-    transform: scale(0.98);
+    transform: translateY(-1px);
+}
+
+.checkout-btn:active {
+    transform: translateY(0);
 }
 
 /* Empty Cart */
@@ -319,12 +314,11 @@ body {
     border-radius: 40px;
     text-decoration: none;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
 }
 
 .empty-cart a:hover {
     background: var(--primary-dark);
-    transform: translateY(-2px);
 }
 
 /* Footer */
@@ -373,12 +367,11 @@ body {
     border-radius: 50%;
     color: white;
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
 }
 
 .social-links a:hover {
     background: var(--primary);
-    transform: translateY(-2px);
 }
 
 .copyright {
@@ -386,6 +379,100 @@ body {
     padding-top: 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 13px;
+}
+
+/* ============================================
+   MODAL XÓA - KHÔNG LAG, TỐI ƯU
+   ============================================ */
+.modal-delete {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-delete.show {
+    display: flex;
+}
+
+.modal-delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-delete-content {
+    position: relative;
+    width: 90%;
+    max-width: 340px;
+    background: var(--white);
+    border-radius: 16px;
+    text-align: center;
+    padding: 24px 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-delete-header i {
+    font-size: 44px;
+    color: #e74c3c;
+    margin-bottom: 12px;
+}
+
+.modal-delete-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0;
+}
+
+.modal-delete-body p {
+    color: var(--gray-text);
+    font-size: 14px;
+    margin: 12px 0 0;
+    line-height: 1.4;
+}
+
+.modal-delete-footer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.modal-delete-footer button {
+    padding: 8px 24px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.1s ease;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+.btn-confirm-delete {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-confirm-delete:hover {
+    background: #c0392b;
 }
 
 /* Responsive */
@@ -411,7 +498,7 @@ body {
         flex-direction: column;
     }
     
-    .clear-cart-btn, .checkout-btn {
+    .clear-cart-btn {
         width: 100%;
         text-align: center;
     }
@@ -425,5 +512,20 @@ body {
     
     .cart-item-info {
         width: 100%;
+    }
+    
+    .modal-delete-content {
+        width: 90%;
+        padding: 20px 16px;
+    }
+    
+    .modal-delete-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-delete-footer button {
+        width: 100%;
+        padding: 10px;
     }
 }

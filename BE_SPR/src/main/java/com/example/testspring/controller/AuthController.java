@@ -2,6 +2,7 @@ package com.example.testspring.controller;
 
 import com.example.testspring.dto.*;
 import com.example.testspring.service.AuthService;
+import com.example.testspring.service.PassWordService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-
+    private final PassWordService passwordService;
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody @Valid RegisterRequest registerRequest) {
         AuthResponse result = authService.register(registerRequest);
@@ -50,7 +51,8 @@ public class AuthController {
         );
     }
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ApiResponse<?>> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7); // remove "Bearer "
         authService.logout(token);
         return ResponseEntity.ok(
                 ApiResponse.builder()
@@ -91,4 +93,28 @@ public class AuthController {
                         .build()
         );
     }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<?>> forgotPassword(
+            @RequestBody ForgotPasswordRequest request
+    ){
+        passwordService.forgotPassword(request.getIdentifier());
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .code(200)
+                        .message("If account exists, reset link has been sent")
+                        .build()
+        );
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<?>> resetPassword(
+            @RequestBody ResetPassWordRequest request) {
+        passwordService.resetPassword(request);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .code(200)
+                        .message("Reset password success!")
+                        .build()
+        );
+    }
+
 }

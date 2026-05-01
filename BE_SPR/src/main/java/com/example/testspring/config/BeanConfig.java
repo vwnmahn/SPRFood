@@ -15,15 +15,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class BeanConfig {
     private final AccountRepository accountRepository;
-    private final CustomUserDetails customUserDetails;
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
     @Bean
-    private UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService() {
         return username -> {
-            Account account = accountRepository.findByPhoneOrEmail(username)
+            Account account = accountRepository.findByPhoneNumber(username)
+                    .or(()->accountRepository.findByEmail(username))
                     .orElseThrow(()->new UsernameNotFoundException(
                             "Không tìm thấy tài khoản !!!" + username
                     ));

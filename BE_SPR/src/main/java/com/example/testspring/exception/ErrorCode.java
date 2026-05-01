@@ -17,6 +17,10 @@ public enum ErrorCode {
     FORBIDDEN(1007,"Forbidden",HttpStatus.FORBIDDEN),
     ACCOUNT_DISABLED(1008,"Account Disabled",HttpStatus.FORBIDDEN),
     USER_NOT_FOUND(1009,"User Not Found",HttpStatus.NOT_FOUND),
+    TOKEN_NOT_FOUND(10010,"Token Not Found",HttpStatus.NOT_FOUND),
+    TOKEN_REVOKED(10011,"Token Revoked",HttpStatus.UNAUTHORIZED),
+    TOKEN_EXPIRED(10012,"Token Expired",HttpStatus.UNAUTHORIZED),
+    TOKEN_USED(10013,"Token Used",HttpStatus.UNAUTHORIZED),
     ;
     private int code;
     private String message;

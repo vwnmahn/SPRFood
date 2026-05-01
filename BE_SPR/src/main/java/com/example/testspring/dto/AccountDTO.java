@@ -18,5 +18,5 @@ public class AccountDTO {
     private String phoneNumber;
     private String address;
     private Set<String> roles;
-    private boolean isOnline;
+    private boolean online;
 }

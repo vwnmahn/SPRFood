@@ -35,7 +35,7 @@ public class Account {
     private String phoneNumber;
     @Column(nullable = false)
     private String address;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "account_role",
             joinColumns = @JoinColumn(name = "account_id"),
@@ -53,10 +53,10 @@ public class Account {
     private boolean enabled;
     @Column(nullable = false)
     private boolean locked;
-    @Column(name = "lock_time",nullable = false)
+    @Column(name = "lock_time")
     private Instant lockTime;
-    @Column(name = "online",nullable = false)
-    private boolean isOnline;
+    @Column(name = "isOnline",nullable = false)
+    private boolean online;
     @PrePersist
     public void prePersist() {
         createdAt = Instant.now();

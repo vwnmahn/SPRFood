@@ -13,7 +13,33 @@
     --radius: 20px;
     --radius-sm: 12px;
 }
+/* ============================================
+   BUTTON HOME
+   ============================================ */
+.btn-home {
+    padding: 6px 16px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: var(--gray-light);
+    color: var(--dark);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
 
+.btn-home:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+.btn-home i {
+    font-size: 13px;
+}
 * {
     margin: 0;
     padding: 0;

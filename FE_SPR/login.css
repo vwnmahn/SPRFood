@@ -11,9 +11,10 @@
     --white: #ffffff;
     --success: #10b981;
     --error: #ef4444;
+    --facebook: #1877f2;
+    --google: #ea4335;
     --radius: 28px;
     --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    --shadow-glow: 0 0 30px rgba(249, 115, 22, 0.3);
 }
 
 * {
@@ -30,32 +31,16 @@ body {
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #ffede8 0%, #fff0e6 50%, #fff5f0 100%);
     min-height: 100vh;
-    height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
     padding: 0;
     position: relative;
     overflow-x: hidden;
 }
 
+/* Bỏ animation nền để giảm lag */
 body::before {
-    content: '';
-    position: fixed;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
-    background: radial-gradient(circle at 30% 40%, rgba(249, 115, 22, 0.08) 0%, transparent 50%);
-    animation: rotate 30s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    display: none;
 }
 
 /* ========== AUTH WRAPPER ========== */
@@ -78,7 +63,6 @@ body::before {
 
 .auth-card {
     background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
     border-radius: var(--radius);
     padding: 28px 24px;
     position: relative;
@@ -88,41 +72,15 @@ body::before {
     margin-bottom: 100px;
 }
 
-/* Decorative circles */
+/* Bỏ decorative circles để giảm render */
 .deco-circle {
-    position: absolute;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(245, 158, 11, 0.08));
-    pointer-events: none;
-}
-
-.deco-1 {
-    width: 200px;
-    height: 200px;
-    top: -80px;
-    right: -80px;
-}
-
-.deco-2 {
-    width: 150px;
-    height: 150px;
-    bottom: -50px;
-    left: -50px;
-}
-
-.deco-3 {
-    width: 100px;
-    height: 100px;
-    top: 30%;
-    left: -30px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.08), transparent);
+    display: none;
 }
 
 /* HEADER */
 .auth-header {
     text-align: center;
     margin-bottom: 20px;
-    position: relative;
 }
 
 .brand-icon {
@@ -162,7 +120,7 @@ body::before {
     font-size: 12px;
 }
 
-/*  TABS  */
+/* TABS */
 .auth-tabs {
     display: flex;
     gap: 8px;
@@ -181,7 +139,7 @@ body::before {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.1s ease;
     color: var(--gray);
 }
 
@@ -197,15 +155,9 @@ body::before {
 
 .tab-pane.active {
     display: block;
-    animation: fadeSlide 0.4s ease;
 }
 
-@keyframes fadeSlide {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* INPUT  */
+/* INPUT - BỎ HIỆU ỨNG NẶNG */
 .input-group {
     position: relative;
     margin-bottom: 12px;
@@ -214,24 +166,18 @@ body::before {
     background: var(--gray-light);
     border-radius: 60px;
     padding: 0 16px;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
 }
 
 .input-group:focus-within {
     background: var(--white);
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    outline: none;
 }
 
 .input-group i {
     color: var(--gray);
     font-size: 14px;
-    transition: color 0.3s ease;
-}
-
-.input-group:focus-within i {
-    color: var(--primary);
 }
 
 .input-group input {
@@ -255,14 +201,13 @@ body::before {
     cursor: pointer;
     color: var(--gray);
     padding: 0 4px;
-    transition: color 0.2s;
 }
 
 .toggle-password:hover {
     color: var(--primary);
 }
 
-/*  FORM OPTIONS */
+/* FORM OPTIONS */
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -292,7 +237,6 @@ body::before {
     background: var(--gray-light);
     border-radius: 3px;
     display: inline-block;
-    transition: all 0.2s ease;
 }
 
 .checkbox-label input:checked + .checkmark {
@@ -317,7 +261,6 @@ body::before {
     text-decoration: none;
     font-weight: 500;
     font-size: 11px;
-    transition: all 0.2s;
 }
 
 .forgot-link:hover {
@@ -333,7 +276,7 @@ body::before {
     text-decoration: none;
 }
 
-/*  BUTTON  */
+/* BUTTON - BỎ HIỆU ỨNG NẶNG */
 .auth-btn {
     width: 100%;
     padding: 10px;
@@ -344,45 +287,19 @@ body::before {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-}
-
-.auth-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.auth-btn:hover::before {
-    left: 100%;
+    transition: opacity 0.1s ease;
 }
 
 .auth-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
+    opacity: 0.9;
 }
 
-.auth-btn i {
-    transition: transform 0.3s ease;
-}
-
-.auth-btn:hover i {
-    transform: translateX(4px);
-}
-
-/* DIVIDER  */
+/* DIVIDER */
 .auth-divider {
     text-align: center;
     margin: 12px 0;
@@ -410,7 +327,7 @@ body::before {
     font-weight: 500;
 }
 
-/*SOCIAL  */
+/* SOCIAL LOGIN - TỐI ƯU */
 .social-login {
     display: flex;
     gap: 10px;
@@ -425,40 +342,38 @@ body::before {
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    color: var(--dark);
+    transition: background 0.1s ease, color 0.1s ease;
 }
 
-.social-btn:hover {
-    transform: translateY(-2px);
-    border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.social-btn.google {
+    color: var(--google);
 }
 
 .social-btn.google:hover {
-    background: #ea4335;
+    background: var(--google);
     color: white;
-    border-color: #ea4335;
 }
 
-.social-btn.apple:hover {
-    background: var(--dark);
-    color: white;
-    border-color: var(--dark);
+.social-btn.facebook {
+    color: var(--facebook);
 }
 
+.social-btn.facebook:hover {
+    background: var(--facebook);
+    color: white;
+}
+
+/* FOOTER - BỎ BLUR ĐỂ GIẢM LAG */
 .auth-footer {
     width: 100%;
     flex-shrink: 0;
-    padding: 24px 60px 28px;
+    padding: 24px 20px 28px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: var(--white);
     border-top: 1px solid rgba(249, 115, 22, 0.15);
     position: relative;
     z-index: 1;
@@ -499,7 +414,6 @@ body::before {
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
-    transition: all 0.2s ease;
 }
 
 .footer-links a i {
@@ -508,7 +422,6 @@ body::before {
 
 .footer-links a:hover {
     color: var(--primary);
-    transform: translateY(-2px);
 }
 
 .footer-social {
@@ -529,13 +442,11 @@ body::before {
     color: var(--gray);
     font-size: 14px;
     text-decoration: none;
-    transition: all 0.2s ease;
 }
 
 .footer-social a:hover {
     background: var(--primary);
     color: white;
-    transform: translateY(-2px);
 }
 
 .footer-copyright {
@@ -556,7 +467,7 @@ body::before {
     letter-spacing: 0.3px;
 }
 
-/*  MODAL */
+/* MODAL - TỐI ƯU */
 .modal {
     position: fixed;
     top: 0;
@@ -580,7 +491,6 @@ body::before {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
 }
 
 .modal-card {
@@ -590,13 +500,7 @@ body::before {
     background: var(--white);
     border-radius: 24px;
     overflow: hidden;
-    animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: var(--shadow);
-}
-
-@keyframes modalPop {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
 }
 
 .modal-header {
@@ -621,13 +525,12 @@ body::before {
     font-size: 15px;
     cursor: pointer;
     color: var(--gray);
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
 }
 
 .modal-close:hover {
@@ -662,7 +565,6 @@ body::before {
     cursor: pointer;
     font-weight: 500;
     font-size: 12px;
-    transition: all 0.2s;
 }
 
 .btn-cancel:hover {
@@ -678,15 +580,13 @@ body::before {
     cursor: pointer;
     font-weight: 500;
     font-size: 12px;
-    transition: all 0.2s;
 }
 
 .btn-confirm:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    opacity: 0.9;
 }
 
-/*  TOAST  */
+/* TOAST */
 .toast {
     position: fixed;
     bottom: 20px;
@@ -698,7 +598,7 @@ body::before {
     border-radius: 50px;
     font-size: 12px;
     z-index: 1100;
-    transition: transform 0.3s ease;
+    transition: transform 0.15s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     white-space: nowrap;
     font-weight: 500;
@@ -715,7 +615,7 @@ body::before {
     margin-right: 5px;
 }
 
-/*  RESPONSIVE */
+/* RESPONSIVE */
 @media (max-width: 480px) {
     .auth-wrapper {
         padding: 20px 12px 16px;
@@ -736,7 +636,7 @@ body::before {
     }
 
     .auth-footer {
-        padding: 18px 20px 22px;
+        padding: 18px 16px 22px;
     }
 
     .footer-logo span { font-size: 17px; }

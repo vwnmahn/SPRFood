@@ -1,7 +1,7 @@
 // ============================================
 // CẤU HÌNH API
 // ============================================
-const API_BASE_URL = "https://your-api-domain.com/api"; // Thay bằng URL backend của bạn
+const API_BASE_URL = "http://localhost:8080/api"; // ← SỬA LẠI URL NÀY
 
 // ============================================
 // QUẢN LÝ ĐĂNG NHẬP
@@ -13,7 +13,19 @@ function getAuthToken() {
 
 function getCurrentUser() {
     const userStr = localStorage.getItem('sprfood_user') || sessionStorage.getItem('sprfood_user');
-    return userStr ? JSON.parse(userStr) : null;
+    // Kiểm tra dữ liệu hợp lệ trước khi parse
+    if (!userStr || userStr === 'undefined' || userStr === 'null') {
+        return null;
+    }
+    try {
+        return JSON.parse(userStr);
+    } catch (e) {
+        console.error("Lỗi parse user data:", e);
+        // Xóa dữ liệu lỗi
+        localStorage.removeItem('sprfood_user');
+        sessionStorage.removeItem('sprfood_user');
+        return null;
+    }
 }
 
 function isLoggedIn() {
@@ -32,11 +44,11 @@ function updateAuthUI() {
         if (userDropdown) {
             userDropdown.style.display = 'block';
             if (userNameDisplay) {
-                const name = user?.name?.split(' ').pop() || 'User';
+                // SỬA: lấy username hoặc email
+                const name = user?.username || user?.email?.split('@')[0] || 'User';
                 userNameDisplay.textContent = name;
             }
         }
-        // Cho phép vào giỏ hàng
         if (cartBtnLink) {
             cartBtnLink.onclick = null;
             cartBtnLink.href = 'cart.html';
@@ -44,13 +56,11 @@ function updateAuthUI() {
     } else {
         if (loginBtn) loginBtn.style.display = 'inline-flex';
         if (userDropdown) userDropdown.style.display = 'none';
-        // Chặn vào giỏ hàng, chuyển hướng ngay lập tức đến đăng nhập
         if (cartBtnLink) {
             cartBtnLink.href = 'javascript:void(0)';
             cartBtnLink.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 300);
@@ -86,11 +96,29 @@ function initUserDropdown() {
     const avatarBtn = document.getElementById('userAvatarBtn');
     const dropdownMenu = document.getElementById('userDropdownMenu');
     const logoutBtn = document.getElementById('logoutBtn');
+    const profileLink = document.getElementById('userProfileLink');
+    const ordersLink = document.getElementById('userOrdersLink');
     
     if (avatarBtn) {
         avatarBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (dropdownMenu) dropdownMenu.classList.toggle('show');
+        });
+    }
+    
+    // THÊM SỰ KIỆN CHO LINK TÀI KHOẢN
+    if (profileLink) {
+        profileLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'profile.html';
+        });
+    }
+    
+    // THÊM SỰ KIỆN CHO LINK ĐƠN HÀNG (nếu có)
+    if (ordersLink) {
+        ordersLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'profile.html'; // Hoặc orders.html nếu có
         });
     }
     
@@ -107,7 +135,7 @@ function initUserDropdown() {
         }
     });
 }
-// KIỂM TRA ĐĂNG NHẬP KHI VÀO TRANG CHI TIẾT QUÁN
+
 function checkAuthAndRedirect() {
     if (!isLoggedIn()) {
         showNotification('🔐 Vui lòng đăng nhập để xem thông tin cửa hàng!', 'error');
@@ -118,7 +146,10 @@ function checkAuthAndRedirect() {
     }
     return true;
 }
-// GIỎ HÀNG - CHỈ HOẠT ĐỘNG KHI ĐÃ ĐĂNG NHẬP
+
+// ============================================
+// GIỎ HÀNG
+// ============================================
 function getCart() {
     if (!isLoggedIn()) return [];
     const cart = localStorage.getItem("sprfood_cart");
@@ -194,7 +225,10 @@ function showNotification(message, type = 'success') {
         setTimeout(() => noti.remove(), 300);
     }, 2000);
 }
+
+// ============================================
 // DỮ LIỆU QUÁN ĂN
+// ============================================
 const restaurantsData = [
     { id: 1, name: "Phở Thìn - Bờ Hồ", slug: "pho-thin-bo-ho", address: "13 Lò Sũ, P. Lý Thái Tổ", city: "hanoi", district: "Hoàn Kiếm", fullAddress: "13 Lò Sũ, P. Lý Thái Tổ, Hoàn Kiếm, Hà Nội", category: "food", rating: 4.9, deliveryTime: "15-25 phút", discount: "12%", popular: true },
     { id: 2, name: "Royaltea - Tây Sơn", slug: "royaltea-tay-son", address: "126 Tây Sơn", city: "hanoi", district: "Đống Đa", fullAddress: "126 Tây Sơn, P. Quang Trung, Đống Đa, Hà Nội", category: "drink", rating: 4.9, deliveryTime: "20-30 phút", discount: "14%", popular: true },
@@ -227,7 +261,10 @@ let currentCategory = "all";
 let currentSearch = "";
 let currentPage = 1;
 const itemsPerPage = 6;
+
+// ============================================
 // ĐỊNH VỊ
+// ============================================
 function loadLocationFromStorage() {
     const savedCity = localStorage.getItem("sprfood_city");
     const savedDistrict = localStorage.getItem("sprfood_district");
@@ -255,7 +292,10 @@ function saveLocation() {
     localStorage.setItem("sprfood_city", currentCity);
     localStorage.setItem("sprfood_district", currentDistrict);
 }
+
+// ============================================
 // LỌC VÀ HIỂN THỊ
+// ============================================
 function filterRestaurants() {
     let filtered = restaurantsData.filter(r => r.city === currentCity);
     if (currentDistrict && currentDistrict !== "Tất cả") {
@@ -310,22 +350,20 @@ function renderRestaurants() {
         </div>
     `).join("");
     
-    // Xử lý click vào quán - KIỂM TRA ĐĂNG NHẬP TRƯỚC KHI CHUYỂN
     document.querySelectorAll(".restaurant-card").forEach(card => {
         card.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
             
-            // Kiểm tra đăng nhập trước khi chuyển sang trang chi tiết
             if (!isLoggedIn()) {
                 const restaurantName = card.getAttribute('data-name') || 'cửa hàng';
+                showNotification(`🔐 Vui lòng đăng nhập để xem "${restaurantName}"!`, 'error');
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 300);
                 return;
             }
             
-            // Nếu đã đăng nhập, chuyển đến trang chi tiết
             const slug = card.getAttribute("data-slug");
             if (slug) {
                 window.location.href = `${slug}.html`;
@@ -360,7 +398,10 @@ function filterAndRender() {
     currentPage = 1;
     renderRestaurants();
 }
+
+// ============================================
 // MODAL ĐỊNH VỊ
+// ============================================
 function openLocationModal() {
     const modal = document.getElementById("locationModal");
     modal.classList.add("show");
@@ -481,12 +522,9 @@ function initModal() {
         if (e.key === "Escape" && modal.classList.contains("show")) closeLocationModal();
     });
 }
-// KIỂM TRA ĐĂNG NHẬP KHI LOAD TRANG CHI TIẾT
+
 function checkPageAccess() {
-    // Lấy tên file hiện tại
     const currentPage = window.location.pathname.split('/').pop();
-    
-    // Nếu là trang chi tiết quán (không phải user.html, login.html, cart.html)
     const isDetailPage = currentPage !== 'user.html' && 
                          currentPage !== 'login.html' && 
                          currentPage !== 'cart.html' &&
@@ -503,29 +541,24 @@ function checkPageAccess() {
     return true;
 }
 
+// ============================================
 // KHỞI TẠO
-
+// ============================================
 document.addEventListener("DOMContentLoaded", () => {
-    // Kiểm tra đăng nhập khi vào trang
     checkPageAccess();
-    
-    // User
     updateAuthUI();
     initUserDropdown();
     updateCartBadge();
     
-    // Định vị
     loadLocationFromStorage();
     initModal();
     document.getElementById("locationSelector")?.addEventListener("click", openLocationModal);
     
-    // Tìm kiếm
     document.getElementById("searchInput")?.addEventListener("input", (e) => {
         currentSearch = e.target.value;
         filterAndRender();
     });
     
-    // Danh mục
     document.querySelectorAll(".food-category-chip").forEach(chip => {
         chip.addEventListener("click", () => {
             document.querySelectorAll(".food-category-chip").forEach(c => c.classList.remove("active"));
@@ -538,7 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderRestaurants();
 });
 
-// Export functions để sử dụng trong các trang chi tiết quán
+// Export functions
 window.addToCart = addToCart;
 window.isLoggedIn = isLoggedIn;
 window.showNotification = showNotification;

@@ -12,8 +12,9 @@ public interface AuthService {
     AuthResponse loginUser(LoginRequest loginRequest);
     AuthResponse loginAdmin(LoginRequest loginRequest);
     AuthResponse register(RegisterRequest registerRequest);
-    void logout(String token);
+    void logout(String refreshToken);
     List<AccountDTO> getOnlineUsers();
     AuthResponse updateInfo(Long id,AccountUpdate accountUpdate);
     void deleteMyAccount(String token);
+    RefreshResponse refreshToken(RefreshRequest refreshRequest);
 }
