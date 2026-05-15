@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,25 +47,20 @@ public class Account {
     private Set<Role> roles= new HashSet<>();
     @CreationTimestamp
     @Column(name = "create_at",nullable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
     @UpdateTimestamp
     @Column(name = "update_at",nullable = false)
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
     @Column(nullable = false)
     private boolean enabled;
     @Column(nullable = false)
+    private String avatar;
+    @Column(nullable = false)
     private boolean locked;
     @Column(name = "lock_time")
-    private Instant lockTime;
-    @Column(name = "isOnline",nullable = false)
+    private LocalDateTime lockTime;
+    @Column(name = "is_online",nullable = false)
     private boolean online;
-    @PrePersist
-    public void prePersist() {
-        createdAt = Instant.now();
-        updatedAt = Instant.now();
-    }
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = Instant.now();
-    }
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 }

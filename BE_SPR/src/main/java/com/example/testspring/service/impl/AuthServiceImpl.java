@@ -19,10 +19,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -162,10 +166,56 @@ public class AuthServiceImpl implements AuthService {
                 newRefreshToken.getToken()
         );
     }
+
+    @Override
+    public AccountDTO getCurrentUser(String token) {
+        Long accountId=  jwtUtil.getAccountId(token);
+        Account acc = accountRepository.findById(accountId)
+                .orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
+        return accountMapper.toDTO(acc);
+    }
+    @Override
+    public String uploadAvatar(MultipartFile file, String token) {
+        // Validate file
+        if (file.isEmpty()) throw new AppException(ErrorCode.INVALID_REQUEST);
+
+        String contentType = file.getContentType();
+        if (contentType == null ||
+                (!contentType.equals("image/jpeg") && !contentType.equals("image/png"))) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        // Lấy account từ token
+        Long accountId = jwtUtil.getAccountId(token);
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Lưu file vào thư mục uploads/avatars/
+        String uploadDir = "uploads/avatars/";
+        String fileName = "avatar_" + accountId + "_" + System.currentTimeMillis()
+                + getExtension(file.getOriginalFilename());
+
+        try {
+            Path uploadPath = Path.of(uploadDir);
+            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+            Files.copy(file.getInputStream(), uploadPath.resolve(fileName),
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.INTERNAL_ERROR);
+        }
+        String avatarUrl = "/uploads/avatars/" + fileName;
+        account.setAvatarUrl(avatarUrl);
+        accountRepository.save(account);
+        return avatarUrl;
+    }
+
+    private String getExtension(String filename) {
+        if (filename == null) return ".jpg";
+        int dot = filename.lastIndexOf('.');
+        return dot >= 0 ? filename.substring(dot) : ".jpg";
+    }
     private AuthResponse buildAuthResponse (Account acc){
-        Set<String> roles = acc.getRoles().stream()
-                .map(role -> role.getRoleName().name())
-                .collect(Collectors.toSet());
+        Set<String> roles = accountMapper.rolesToStrings(acc.getRoles());
         String token = jwtUtil.generateToken(acc.getId(), roles);
         return AuthResponse.builder()
                 .token(token)

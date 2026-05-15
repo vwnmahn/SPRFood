@@ -60,20 +60,89 @@
         </div>
     </footer>
 
-    <!-- Modal xác nhận xóa -->
+    <!-- Modal xác nhận xóa sản phẩm -->
     <div id="deleteConfirmModal" class="modal-delete">
         <div class="modal-delete-overlay"></div>
-        <div class="modal-delete-content">
+        <div class="modal-delete-container">
             <div class="modal-delete-header">
                 <i class="fas fa-trash-alt"></i>
                 <h3>Xác nhận xóa</h3>
             </div>
             <div class="modal-delete-body">
-                <p id="modalMessage">Bạn có đồng ý xóa sản phẩm này không?</p>
+                <p>Bạn có đồng ý xóa <strong>"sản phẩm"</strong> khỏi giỏ hàng không?</p>
             </div>
             <div class="modal-delete-footer">
-                <button class="btn-cancel" id="cancelDeleteBtn">Không</button>
-                <button class="btn-confirm-delete" id="confirmDeleteBtn">Có, xóa</button>
+                <button class="btn-cancel-delete" id="cancelDeleteBtn">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <button class="btn-confirm-delete" id="confirmDeleteBtn">
+                    <i class="fas fa-check"></i> Đồng ý
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal xác nhận thông tin giao hàng (TRƯỚC KHI ĐẶT HÀNG) -->
+    <div id="addressConfirmModal" class="modal-address">
+        <div class="modal-address-overlay"></div>
+        <div class="modal-address-container">
+            <div class="modal-address-header">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>Xác nhận thông tin giao hàng</h3>
+                <button class="close-address" id="closeAddressModal">&times;</button>
+            </div>
+            <div class="modal-address-body">
+                <div class="form-group">
+                    <label>Họ và tên <span class="required">*</span></label>
+                    <input type="text" id="confirmFullName" class="form-input" placeholder="Nhập họ tên">
+                </div>
+                <div class="form-group">
+                    <label>Tên tài khoản</label>
+                    <input type="text" id="confirmUsername" class="form-input" placeholder="Tên tài khoản" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại <span class="required">*</span></label>
+                    <input type="tel" id="confirmPhone" class="form-input" placeholder="Nhập số điện thoại">
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ giao hàng <span class="required">*</span></label>
+                    <input type="text" id="confirmAddress" class="form-input" placeholder="Số nhà, tên đường, phường/xã">
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú (tùy chọn)</label>
+                    <textarea id="confirmNote" class="form-input" rows="2" placeholder="Ghi chú cho nhà hàng..."></textarea>
+                </div>
+                <div class="total-preview">
+                    <span>Tổng tiền thanh toán:</span>
+                    <strong id="confirmTotalAmount">0₫</strong>
+                </div>
+                <div class="warning-message">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Vui lòng kiểm tra kỹ thông tin trước khi đặt hàng!</span>
+                </div>
+            </div>
+            <div class="modal-address-footer">
+                <button class="btn-cancel-address" id="cancelAddressBtn">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </button>
+                <button class="btn-confirm-address" id="confirmAddressOrderBtn">
+                    <i class="fas fa-check-circle"></i> Xác nhận đặt hàng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal thông báo đặt hàng thành công -->
+    <div id="orderSuccessModal" class="modal-success">
+        <div class="modal-success-overlay"></div>
+        <div class="modal-success-container">
+            <div class="modal-success-body">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h3>Đặt hàng thành công!</h3>
+                <p>Cảm ơn bạn đã mua hàng! 🎉</p>
+                <button class="btn-close" id="closeSuccessModal">
+                    <i class="fas fa-check"></i> OK
+                </button>
             </div>
         </div>
     </div>

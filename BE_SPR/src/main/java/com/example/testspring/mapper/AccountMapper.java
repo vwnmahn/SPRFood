@@ -24,6 +24,7 @@ public interface AccountMapper {
     @Mapping(target = "lockTime", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+
     Account toAccount(RegisterRequest request);
 
     // ========== CẬP NHẬT Account từ AccountUpdate ==========
@@ -42,6 +43,8 @@ public interface AccountMapper {
     // ========== CHUYỂN Account → AccountDTO ==========
     @Mapping(target = "online", source = "online")
     @Mapping(target = "roles", source = "roles", qualifiedByName = "rolesToStrings")
+    @Mapping(target = "locked", source = "locked")
+    @Mapping(target = "avatarUrl", source = "avatarUrl")
     AccountDTO toDTO(Account account);
 
     // ========== CHUYỂN ĐỔI Set<Role> → Set<String> ==========

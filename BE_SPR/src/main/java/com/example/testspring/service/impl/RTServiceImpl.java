@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -25,7 +26,7 @@ public class RTServiceImpl implements RTService {
         rt.setAccountId(accountId);
         rt.setToken(UUID.randomUUID().toString());
         rt.setRevoked(false);
-        rt.setExpiryDate(Instant.now().plusSeconds(7 * 24 * 60 * 60));
+        rt.setExpiryDate(LocalDateTime.now().plusSeconds(7 * 24 * 60 * 60));
 
         return refreshTokenRepository.save(rt);
     }
@@ -42,7 +43,7 @@ public class RTServiceImpl implements RTService {
             throw new AppException(ErrorCode.TOKEN_REVOKED);
         }
         // 4. check expired (DB level - nếu bạn lưu expiry)
-        if (tokenEntity.getExpiryDate().isBefore(Instant.now())) {
+        if (tokenEntity.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
         return tokenEntity;

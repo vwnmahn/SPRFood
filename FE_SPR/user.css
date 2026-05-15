@@ -696,13 +696,23 @@ body {
 
 .card-img {
     height: 150px;
+    overflow: hidden;
+    position: relative;
+}
+.card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.card-img-placeholder {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 52px;
-    position: relative;
 }
-
 .discount-badge {
     position: absolute;
     top: 10px;

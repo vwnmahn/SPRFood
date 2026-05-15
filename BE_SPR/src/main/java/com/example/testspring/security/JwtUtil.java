@@ -41,7 +41,7 @@ public class JwtUtil {
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
-    private String extract(String token) {
+    public String extract(String token) {
         if (token == null || !token.startsWith("Bearer ")) {
             throw new JwtException("Invalid Authorization header");
         }
@@ -51,7 +51,7 @@ public class JwtUtil {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
-                .parseClaimsJws(extract(token))
+                .parseClaimsJws(token)
                 .getBody();
     }
     public boolean validateToken(String token){

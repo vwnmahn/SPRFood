@@ -19,4 +19,6 @@ public class AccountDTO {
     private String address;
     private Set<String> roles;
     private boolean online;
+    private boolean locked;
+    private String avatarUrl;
 }

@@ -3,6 +3,7 @@ package com.example.testspring.service;
 import com.example.testspring.dto.*;
 import com.example.testspring.entity.RoleName;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,4 +18,6 @@ public interface AuthService {
     AuthResponse updateInfo(Long id,AccountUpdate accountUpdate);
     void deleteMyAccount(String token);
     RefreshResponse refreshToken(RefreshRequest refreshRequest);
+    AccountDTO getCurrentUser(String token);
+    String uploadAvatar(MultipartFile file, String token);
 }

@@ -38,8 +38,9 @@
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         <div class="dropdown-menu" id="userDropdownMenu">
-                            <a href="#" id="userProfileLink"><i class="fas fa-user"></i> Tài khoản</a>
-                            <a href="#" id="userOrdersLink"><i class="fas fa-clipboard-list"></i> Đơn hàng</a>
+                            <a href="profile.html" id="userProfileLink"><i class="fas fa-user"></i> Tài khoản</a>
+                            <a href="order-history.html" id="userOrdersLink"><i class="fas fa-clipboard-list"></i> Đơn hàng</a>
+                            <hr>
                             <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                         </div>
                     </div>
@@ -132,10 +133,16 @@
     <main class="restaurant-list">
         <div class="container">
             <div class="section-header">
-                <h2>✨ Gợi ý hôm nay</h2>
+                <h2> Gợi ý hôm nay</h2>
                 <span class="result-hint" id="resultHint">Đang tải...</span>
             </div>
-            <div class="restaurant-grid" id="restaurantGrid"></div>
+            <div class="restaurant-grid" id="restaurantGrid">
+                <!-- Dữ liệu sẽ được load từ API -->
+                <div style="grid-column:1/-1;text-align:center;padding:60px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:48px;color:var(--primary);margin-bottom:16px;"></i>
+                    <p>Đang tải danh sách nhà hàng...</p>
+                </div>
+            </div>
             <div id="pagination" class="pagination"></div>
         </div>
     </main>

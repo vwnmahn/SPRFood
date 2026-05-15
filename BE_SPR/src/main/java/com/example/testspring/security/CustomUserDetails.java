@@ -12,6 +12,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
     private final Account account;
+    public Account getAccount() {
+        return account;
+    }
     @Override
     public boolean isAccountNonExpired() {
         return true;

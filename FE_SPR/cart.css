@@ -20,6 +20,7 @@ body {
     font-family: 'Inter', sans-serif;
     background: var(--gray-bg);
     color: var(--dark);
+    min-height: 100vh;
 }
 
 .container {
@@ -76,7 +77,6 @@ body {
     font-weight: 500;
     padding: 8px 16px;
     border-radius: 40px;
-    transition: all 0.15s ease;
 }
 
 .back-home:hover {
@@ -175,10 +175,9 @@ body {
     cursor: pointer;
     font-weight: bold;
     font-size: 16px;
-    transition: all 0.1s ease;
 }
 
-.qty-btn:hover {
+.qty-btn:active {
     background: var(--primary);
     color: white;
 }
@@ -204,11 +203,10 @@ body {
     cursor: pointer;
     font-size: 18px;
     padding: 8px;
-    transition: all 0.1s ease;
     border-radius: 50%;
 }
 
-.delete-btn:hover {
+.delete-btn:active {
     background: #fee2e0;
 }
 
@@ -255,13 +253,13 @@ body {
     border-radius: 40px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.15s ease;
 }
 
-.clear-cart-btn:hover {
+.clear-cart-btn:active {
     background: #e74c3c;
     color: white;
 }
+
 /* Checkout Button */
 .checkout-btn {
     width: 100%;
@@ -273,17 +271,11 @@ body {
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.15s ease;
     margin-top: 16px;
 }
 
-.checkout-btn:hover {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
-}
-
 .checkout-btn:active {
-    transform: translateY(0);
+    background: var(--primary-dark);
 }
 
 /* Empty Cart */
@@ -314,10 +306,9 @@ body {
     border-radius: 40px;
     text-decoration: none;
     font-weight: 600;
-    transition: all 0.15s ease;
 }
 
-.empty-cart a:hover {
+.empty-cart a:active {
     background: var(--primary-dark);
 }
 
@@ -367,10 +358,9 @@ body {
     border-radius: 50%;
     color: white;
     text-decoration: none;
-    transition: all 0.15s ease;
 }
 
-.social-links a:hover {
+.social-links a:active {
     background: var(--primary);
 }
 
@@ -382,25 +372,36 @@ body {
 }
 
 /* ============================================
-   MODAL XÓA - KHÔNG LAG, TỐI ƯU
+   MODAL TỐI ƯU TỐI ĐA - KHÔNG TRANSITION
    ============================================ */
-.modal-delete {
+
+.modal-delete,
+.modal-checkout,
+.modal-success {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 1000;
-    display: none;
+    display: flex !important;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.1s linear, visibility 0.1s linear;
 }
 
-.modal-delete.show {
-    display: flex;
+.modal-delete.show,
+.modal-checkout.show,
+.modal-success.show {
+    opacity: 1;
+    visibility: visible;
 }
 
-.modal-delete-overlay {
+.modal-delete-overlay,
+.modal-checkout-overlay,
+.modal-success-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -409,61 +410,93 @@ body {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.modal-delete-content {
+.modal-delete-container,
+.modal-checkout-container {
     position: relative;
+    background: var(--white);
+    border-radius: 20px;
     width: 90%;
     max-width: 340px;
-    background: var(--white);
-    border-radius: 16px;
     text-align: center;
     padding: 24px 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.modal-delete-header i {
-    font-size: 44px;
-    color: #e74c3c;
+.modal-success-container {
+    position: relative;
+    background: var(--white);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 300px;
+    text-align: center;
+    padding: 32px 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal Header Icons */
+.modal-delete-header i,
+.modal-checkout-header i {
+    font-size: 48px;
     margin-bottom: 12px;
 }
 
-.modal-delete-header h3 {
-    font-size: 18px;
-    font-weight: 600;
+.modal-delete-header i {
+    color: #e74c3c;
+}
+
+.modal-checkout-header i {
+    color: #ff9800;
+}
+
+.modal-delete-header h3,
+.modal-checkout-header h3 {
+    font-size: 20px;
+    font-weight: 700;
     color: var(--dark);
     margin: 0;
 }
 
-.modal-delete-body p {
+.modal-delete-body p,
+.modal-checkout-body p {
     color: var(--gray-text);
     font-size: 14px;
     margin: 12px 0 0;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
-.modal-delete-footer {
+.modal-delete-body strong,
+.modal-checkout-body .total-amount {
+    color: var(--primary);
+}
+
+/* Modal Footer Buttons */
+.modal-delete-footer,
+.modal-checkout-footer {
     display: flex;
     justify-content: center;
     gap: 12px;
-    margin-top: 20px;
+    margin-top: 24px;
 }
 
-.modal-delete-footer button {
-    padding: 8px 24px;
+.modal-delete-footer button,
+.modal-checkout-footer button {
+    padding: 10px 24px;
     border-radius: 40px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     border: none;
-    transition: all 0.1s ease;
 }
 
+.btn-cancel-delete,
 .btn-cancel {
     background: #f3f4f6;
     color: #374151;
 }
 
-.btn-cancel:hover {
-    background: #e5e7eb;
+.btn-cancel-delete:active,
+.btn-cancel:active {
+    opacity: 0.8;
 }
 
 .btn-confirm-delete {
@@ -471,11 +504,85 @@ body {
     color: white;
 }
 
-.btn-confirm-delete:hover {
-    background: #c0392b;
+.btn-confirm-delete:active {
+    opacity: 0.8;
 }
 
-/* Responsive */
+.btn-confirm {
+    background: #4caf50;
+    color: white;
+}
+
+.btn-confirm:active {
+    opacity: 0.8;
+}
+
+/* Modal Success */
+.success-icon {
+    font-size: 64px;
+    color: #4caf50;
+    margin-bottom: 16px;
+}
+
+.modal-success-body h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0 0 8px;
+}
+
+.modal-success-body p {
+    color: var(--gray-text);
+    font-size: 14px;
+    margin: 0 0 24px;
+}
+
+.btn-close {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 32px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-close:active {
+    opacity: 0.8;
+}
+
+/* Toast Notification */
+.cart-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--dark);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    z-index: 1200;
+    transition: transform 0.1s linear;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.cart-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.cart-toast i {
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 @media (max-width: 768px) {
     .container {
         padding: 0 16px;
@@ -514,18 +621,83 @@ body {
         width: 100%;
     }
     
-    .modal-delete-content {
-        width: 90%;
+    .modal-delete-container,
+    .modal-checkout-container,
+    .modal-success-container {
+        width: 85%;
         padding: 20px 16px;
     }
     
-    .modal-delete-footer {
+    .modal-delete-footer,
+    .modal-checkout-footer {
         flex-direction: column;
         gap: 10px;
     }
     
-    .modal-delete-footer button {
+    .modal-delete-footer button,
+    .modal-checkout-footer button {
         width: 100%;
         padding: 10px;
+    }
+    
+    .cart-toast {
+        white-space: normal;
+        text-align: center;
+        max-width: 90%;
+        font-size: 13px;
+    }
+    
+    .success-icon {
+        font-size: 52px;
+    }
+    
+    .modal-success-body h3 {
+        font-size: 18px;
+    }
+}
+
+/* Hover chỉ dành cho desktop */
+@media (min-width: 1024px) {
+    .qty-btn:hover {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .delete-btn:hover {
+        background: #fee2e0;
+    }
+    
+    .clear-cart-btn:hover {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .checkout-btn:hover {
+        background: var(--primary-dark);
+    }
+    
+    .btn-cancel-delete:hover,
+    .btn-cancel:hover {
+        background: #e5e7eb;
+    }
+    
+    .btn-confirm-delete:hover {
+        background: #c0392b;
+    }
+    
+    .btn-confirm:hover {
+        background: #45a049;
+    }
+    
+    .btn-close:hover {
+        background: #45a049;
+    }
+    
+    .empty-cart a:hover {
+        background: var(--primary-dark);
+    }
+    
+    .social-links a:hover {
+        background: var(--primary);
     }
 }

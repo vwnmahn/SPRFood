@@ -1,15 +1,23 @@
 package com.example.testspring.controller;
 
 import com.example.testspring.dto.*;
+import com.example.testspring.exception.AppException;
+import com.example.testspring.exception.ErrorCode;
+import com.example.testspring.security.JwtUtil;
 import com.example.testspring.service.AuthService;
 import com.example.testspring.service.PassWordService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -17,6 +25,7 @@ import java.util.List;
 public class AuthController {
     private final AuthService authService;
     private final PassWordService passwordService;
+    private final JwtUtil jwtUtil;
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody @Valid RegisterRequest registerRequest) {
         AuthResponse result = authService.register(registerRequest);
@@ -113,6 +122,50 @@ public class AuthController {
                 ApiResponse.builder()
                         .code(200)
                         .message("Reset password success!")
+                        .build()
+        );
+    }
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<AccountDTO>> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        AccountDTO user = authService.getCurrentUser(token);
+        return ResponseEntity.ok(
+                ApiResponse.<AccountDTO>builder()
+                        .code(200)
+                        .message("Get user success!")
+                        .data(user)
+                        .build()
+        );
+    }
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<?>> changePassword(
+            @RequestBody @Valid ChangePasswordRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        Long accountId = jwtUtil.getAccountId(token);
+
+        passwordService.changePassword(request, accountId);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .code(200)
+                        .message("Đổi mật khẩu thành công!")
+                        .build()
+        );
+    }
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<Map<String, String>>> uploadAvatar(
+            @RequestParam("avatar") MultipartFile file,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        String avatarUrl = authService.uploadAvatar(file, token);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Map<String, String>>builder()
+                        .code(200)
+                        .message("Cập nhật ảnh đại diện thành công!")
+                        .data(Map.of("avatarUrl", avatarUrl))
                         .build()
         );
     }

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -20,6 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -42,11 +45,11 @@ public class JwtFilter extends OncePerRequestFilter {
             && SecurityContextHolder.getContext().getAuthentication() == null){
                 Long accountId = jwtUtil.getAccountId(token);
                 accountRepository.findById(accountId).ifPresent(account -> {
-                    var auth = buildAuthentication(account,request);
+                    var auth = buildAuthentication(account,request,token);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 });
             }
-            doFilter(request, response, filterChain);
+            filterChain.doFilter(request, response);
         }
         catch (JwtException | IllegalArgumentException e){
             log.error("JwtFilter exception", e);
@@ -59,11 +62,16 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         return null;
     }
-    public UsernamePasswordAuthenticationToken buildAuthentication(Account account, HttpServletRequest request) {
+    public UsernamePasswordAuthenticationToken buildAuthentication(Account account, HttpServletRequest request, String token) {
+        // Lấy roles từ JWT thay vì account.getRoles()
+        Set<String> roles = jwtUtil.getRoles(token);
+        Collection<GrantedAuthority> authorities = roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
         CustomUserDetails customUserDetails = new CustomUserDetails(account);
-        Collection<? extends GrantedAuthority> authorities = customUserDetails.getAuthorities();
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
-        token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        return token;
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        return authToken;
     }
 }

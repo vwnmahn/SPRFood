@@ -1,7 +1,45 @@
 // ============================================
 // CẤU HÌNH API
 // ============================================
-const API_BASE_URL = "http://localhost:8080/api"; // ← SỬA LẠI URL NÀY
+const API_BASE_URL = "http://localhost:8080/api";
+
+// ========== BIẾN TOÀN CỤC ==========
+let restaurantsData = [];
+let currentCity = "hanoi";
+let currentCityName = "Hà Nội";
+let currentDistrict = "";
+let currentCategory = "all";
+let currentSearch = "";
+let currentPage = 1;
+const itemsPerPage = 6;
+
+// ========== DỮ LIỆU TĨNH ==========
+const cities = [
+    { id: "hanoi", name: "Hà Nội" },
+    { id: "hcm", name: "TP. Hồ Chí Minh" },
+    { id: "danang", name: "Đà Nẵng" },
+    { id: "haiphong", name: "Hải Phòng" },
+    { id: "cantho", name: "Cần Thơ" }
+];
+
+const districtsByCity = {
+    hanoi: ["Ba Đình", "Cầu Giấy", "Đống Đa", "Hà Đông", "Hai Bà Trưng", "Hoàn Kiếm", "Hoàng Mai", "Long Biên", "Tây Hồ", "Thanh Xuân", "Bắc Từ Liêm", "Nam Từ Liêm"],
+    hcm: ["Quận 1", "Quận 2", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 9", "Quận 10", "Quận 11", "Quận 12", "Bình Thạnh", "Phú Nhuận", "Tân Bình"],
+    danang: ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ"],
+    haiphong: ["Hồng Bàng", "Ngô Quyền", "Lê Chân", "Hải An", "Kiến An", "Đồ Sơn"],
+    cantho: ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt"]
+};
+
+const categoryIconMap = {
+    "food": "utensils",
+    "drink": "mug-hot",
+    "vegan": "leaf",
+    "vegetarian": "leaf",
+    "cake": "cake-candles",
+    "fastfood": "burger",
+    "noodle": "bowl-food",
+    "default": "store"
+};
 
 // ============================================
 // QUẢN LÝ ĐĂNG NHẬP
@@ -13,15 +51,11 @@ function getAuthToken() {
 
 function getCurrentUser() {
     const userStr = localStorage.getItem('sprfood_user') || sessionStorage.getItem('sprfood_user');
-    // Kiểm tra dữ liệu hợp lệ trước khi parse
-    if (!userStr || userStr === 'undefined' || userStr === 'null') {
-        return null;
-    }
+    if (!userStr || userStr === 'undefined' || userStr === 'null') return null;
     try {
         return JSON.parse(userStr);
     } catch (e) {
         console.error("Lỗi parse user data:", e);
-        // Xóa dữ liệu lỗi
         localStorage.removeItem('sprfood_user');
         sessionStorage.removeItem('sprfood_user');
         return null;
@@ -32,22 +66,118 @@ function isLoggedIn() {
     return !!getAuthToken();
 }
 
+function isUserLocked(user) {
+    if (!user) return false;
+    return user.locked === true || user.status === 'locked' || user.status === 'LOCKED' || user.accountStatus === 'LOCKED' || user.enabled === false;
+}
+
+function enforceLockedUser() {
+    const user = getCurrentUser();
+    if (user && isUserLocked(user)) {
+        showNotification(' Tài khoản của bạn đã bị khóa. Đăng xuất...','error');
+        logout();
+        return true;
+    }
+    return false;
+}
+
+// ========== AVATAR ==========
+const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
+
+function getAvatarUrl(user) {
+    if (!user) return '';
+    return user.avatarUrl || user.avatar || '';
+}
+
+function normalizeAvatarUrl(avatarUrl) {
+    if (!avatarUrl) return '';
+    avatarUrl = avatarUrl.trim();
+    if (!avatarUrl) return '';
+    if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) return avatarUrl;
+    if (avatarUrl.startsWith('/')) return `${SERVER_BASE_URL}${avatarUrl}`;
+    return `${SERVER_BASE_URL}/${avatarUrl}`;
+}
+
+function renderUserAvatar(avatarUrl) {
+    const avatarBtn = document.getElementById('userAvatarBtn');
+    if (!avatarBtn) return;
+
+    let avatarImg = avatarBtn.querySelector('img.user-avatar-img');
+    const defaultIcon = avatarBtn.querySelector('i');
+
+    if (!avatarImg) {
+        avatarImg = document.createElement('img');
+        avatarImg.className = 'user-avatar-img';
+        avatarImg.alt = 'Avatar';
+        avatarImg.style.cssText = 'display:none;width:32px;height:32px;border-radius:50%;object-fit:cover;';
+        avatarBtn.prepend(avatarImg);
+    }
+
+    if (avatarUrl) {
+        avatarImg.onerror = () => {
+            avatarImg.style.display = 'none';
+            if (defaultIcon) defaultIcon.style.display = 'inline-block';
+        };
+        avatarImg.onload = () => {
+            avatarImg.style.display = 'inline-block';
+            if (defaultIcon) defaultIcon.style.display = 'none';
+        };
+        avatarImg.src = normalizeAvatarUrl(avatarUrl) + `?t=${Date.now()}`;
+    } else {
+        avatarImg.style.display = 'none';
+        if (defaultIcon) defaultIcon.style.display = 'inline-block';
+    }
+}
+
+// ========== Đồng bộ user từ server ==========
+async function syncUserFromServer() {
+    if (!isLoggedIn()) return;
+    try {
+        const token = getAuthToken();
+        const res = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const freshUser = data.data || data;
+
+            // Merge với dữ liệu cũ trong localStorage
+            if (isUserLocked(freshUser)) {
+                showNotification(' Tài khoản của bạn đã bị khóa. Đăng xuất...', 'error');
+                logout();
+                return;
+            }
+
+            const stored = getCurrentUser();
+            const merged = { ...stored, ...freshUser };
+            localStorage.setItem('sprfood_user', JSON.stringify(merged));
+
+            // Cập nhật avatar trên navbar
+            renderUserAvatar(getAvatarUrl(merged));
+        }
+    } catch (e) {
+        console.warn('Không thể đồng bộ thông tin user:', e);
+    }
+}
+
 function updateAuthUI() {
     const loginBtn = document.getElementById('loginBtn');
     const userDropdown = document.getElementById('userDropdown');
     const userNameDisplay = document.getElementById('userNameDisplay');
     const cartBtnLink = document.getElementById('cartBtnLink');
-    
+
     if (isLoggedIn()) {
+        if (enforceLockedUser()) return;
         const user = getCurrentUser();
         if (loginBtn) loginBtn.style.display = 'none';
         if (userDropdown) {
             userDropdown.style.display = 'block';
             if (userNameDisplay) {
-                // SỬA: lấy username hoặc email
                 const name = user?.username || user?.email?.split('@')[0] || 'User';
                 userNameDisplay.textContent = name;
             }
+            // Hiển thị avatar từ localStorage trước (tránh chờ API)
+            renderUserAvatar(getAvatarUrl(user));
         }
         if (cartBtnLink) {
             cartBtnLink.onclick = null;
@@ -61,9 +191,7 @@ function updateAuthUI() {
             cartBtnLink.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 300);
+                setTimeout(() => { window.location.href = 'login.html'; }, 300);
             };
         }
     }
@@ -81,14 +209,14 @@ async function logout() {
             console.error('Logout error:', error);
         }
     }
-    
+
     localStorage.removeItem('sprfood_token');
     localStorage.removeItem('sprfood_user');
     sessionStorage.removeItem('sprfood_token');
     sessionStorage.removeItem('sprfood_user');
-    
+
     updateAuthUI();
-    showNotification('👋 Đã đăng xuất!');
+    showNotification(' Đã đăng xuất!');
     setTimeout(() => window.location.reload(), 800);
 }
 
@@ -96,55 +224,37 @@ function initUserDropdown() {
     const avatarBtn = document.getElementById('userAvatarBtn');
     const dropdownMenu = document.getElementById('userDropdownMenu');
     const logoutBtn = document.getElementById('logoutBtn');
-    const profileLink = document.getElementById('userProfileLink');
     const ordersLink = document.getElementById('userOrdersLink');
-    
+
     if (avatarBtn) {
         avatarBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (dropdownMenu) dropdownMenu.classList.toggle('show');
+            dropdownMenu.classList.toggle('show');
         });
     }
-    
-    // THÊM SỰ KIỆN CHO LINK TÀI KHOẢN
-    if (profileLink) {
-        profileLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'profile.html';
-        });
-    }
-    
-    // THÊM SỰ KIỆN CHO LINK ĐƠN HÀNG (nếu có)
+
     if (ordersLink) {
         ordersLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'profile.html'; // Hoặc orders.html nếu có
+            if (!isLoggedIn()) {
+                e.preventDefault();
+                showNotification(' Vui lòng đăng nhập để xem đơn hàng!', 'error');
+                setTimeout(() => { window.location.href = 'login.html'; }, 500);
+            }
         });
     }
-    
+
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
             logout();
         });
     }
-    
+
     document.addEventListener('click', (e) => {
         if (dropdownMenu && avatarBtn && !avatarBtn.contains(e.target)) {
             dropdownMenu.classList.remove('show');
         }
     });
-}
-
-function checkAuthAndRedirect() {
-    if (!isLoggedIn()) {
-        showNotification('🔐 Vui lòng đăng nhập để xem thông tin cửa hàng!', 'error');
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 300);
-        return false;
-    }
-    return true;
 }
 
 // ============================================
@@ -177,48 +287,15 @@ function updateCartBadge() {
     }
 }
 
-function addToCart(restaurant, item) {
-    if (!isLoggedIn()) {
-        showNotification('🔐 Vui lòng đăng nhập để thêm vào giỏ hàng!', 'error');
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 300);
-        return false;
-    }
-    
-    const cart = getCart();
-    const existingItem = cart.find(i => i.restaurantId === restaurant.id && i.itemId === item.id);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            id: Date.now(),
-            restaurantId: restaurant.id,
-            restaurantName: restaurant.name,
-            restaurantSlug: restaurant.slug,
-            itemId: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: 1,
-            image: item.image
-        });
-    }
-    
-    saveCart(cart);
-    showNotification(`✅ Đã thêm "${item.name}" vào giỏ hàng!`);
-    return true;
-}
-
 function showNotification(message, type = 'success') {
     const oldNoti = document.querySelector(".cart-notification");
     if (oldNoti) oldNoti.remove();
-    
+
     const noti = document.createElement("div");
     noti.className = `cart-notification ${type}`;
     noti.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span>`;
     document.body.appendChild(noti);
-    
+
     setTimeout(() => noti.classList.add("show"), 10);
     setTimeout(() => {
         noti.classList.remove("show");
@@ -227,40 +304,120 @@ function showNotification(message, type = 'success') {
 }
 
 // ============================================
-// DỮ LIỆU QUÁN ĂN
+// LẤY DỮ LIỆU NHÀ HÀNG TỪ API
 // ============================================
-const restaurantsData = [
-    { id: 1, name: "Phở Thìn - Bờ Hồ", slug: "pho-thin-bo-ho", address: "13 Lò Sũ, P. Lý Thái Tổ", city: "hanoi", district: "Hoàn Kiếm", fullAddress: "13 Lò Sũ, P. Lý Thái Tổ, Hoàn Kiếm, Hà Nội", category: "food", rating: 4.9, deliveryTime: "15-25 phút", discount: "12%", popular: true },
-    { id: 2, name: "Royaltea - Tây Sơn", slug: "royaltea-tay-son", address: "126 Tây Sơn", city: "hanoi", district: "Đống Đa", fullAddress: "126 Tây Sơn, P. Quang Trung, Đống Đa, Hà Nội", category: "drink", rating: 4.9, deliveryTime: "20-30 phút", discount: "14%", popular: true },
-    { id: 3, name: "Chay Sen - Hồ Tây", slug: "chay-sen-ho-tay", address: "20 Quảng An", city: "hanoi", district: "Tây Hồ", fullAddress: "20 Quảng An, P. Quảng An, Tây Hồ, Hà Nội", category: "vegan", rating: 4.8, deliveryTime: "25-35 phút", discount: "15%", popular: true },
-    { id: 4, name: "Paris Gateaux - Tràng Tiền", slug: "paris-gateaux-trang-tien", address: "25 Tràng Tiền", city: "hanoi", district: "Hoàn Kiếm", fullAddress: "25 Tràng Tiền, P. Tràng Tiền, Hoàn Kiếm, Hà Nội", category: "cake", rating: 4.9, deliveryTime: "25-35 phút", discount: "10%", popular: true },
-    { id: 5, name: "Pizza Hut - Thái Hà", slug: "pizza-hut-thai-ha", address: "112 Thái Hà", city: "hanoi", district: "Đống Đa", fullAddress: "112 Thái Hà, P. Trung Liệt, Đống Đa, Hà Nội", category: "fastfood", rating: 4.7, deliveryTime: "20-30 phút", discount: "15%", popular: true },
-    { id: 6, name: "Phở 10 Lý Quốc Sư", slug: "pho-10-ly-quoc-su", address: "10 Lý Quốc Sư", city: "hanoi", district: "Hoàn Kiếm", fullAddress: "10 Lý Quốc Sư, P. Hàng Trống, Hoàn Kiếm, Hà Nội", category: "noodle", rating: 4.8, deliveryTime: "15-25 phút", discount: "10%", popular: true }
-];
+async function loadRestaurantsFromAPI() {
+    const grid = document.getElementById("restaurantGrid");
+    if (grid) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;">
+            <i class="fas fa-spinner fa-spin" style="font-size:48px;color:var(--primary);margin-bottom:16px;"></i>
+            <p>Đang tải danh sách nhà hàng...</p>
+        </div>`;
+    }
 
-const cities = [
-    { id: "hanoi", name: "Hà Nội" },
-    { id: "hcm", name: "TP. Hồ Chí Minh" },
-    { id: "danang", name: "Đà Nẵng" },
-    { id: "haiphong", name: "Hải Phòng" },
-    { id: "cantho", name: "Cần Thơ" }
-];
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            showNotification(' Vui lòng đăng nhập để xem danh sách nhà hàng!', 'error');
+            restaurantsData = [];
+            filterAndRender();
+            return;
+        }
 
-const districtsByCity = {
-    hanoi: ["Ba Đình", "Cầu Giấy", "Đống Đa", "Hà Đông", "Hai Bà Trưng", "Hoàn Kiếm", "Hoàng Mai", "Long Biên", "Tây Hồ", "Thanh Xuân", "Bắc Từ Liêm", "Nam Từ Liêm"],
-    hcm: ["Quận 1", "Quận 2", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 9", "Quận 10", "Quận 11", "Quận 12", "Bình Thạnh", "Phú Nhuận", "Tân Bình"],
-    danang: ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ"],
-    haiphong: ["Hồng Bàng", "Ngô Quyền", "Lê Chân", "Hải An", "Kiến An", "Đồ Sơn"],
-    cantho: ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt"]
-};
+        const response = await fetch(`${API_BASE_URL}/restaurants`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-let currentCity = "hanoi";
-let currentCityName = "Hà Nội";
-let currentDistrict = "";
-let currentCategory = "all";
-let currentSearch = "";
-let currentPage = 1;
-const itemsPerPage = 6;
+        if (response.status === 401) {
+            showNotification(' Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!', 'error');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+            return;
+        }
+
+        if (response.ok) {
+            const restaurants = await response.json();
+            const activeRestaurants = restaurants.filter(r =>
+                r.status === 'ACTIVE' || r.status === 'active' || r.status === true
+            );
+
+            restaurantsData = activeRestaurants.map(rest => ({
+                id: rest.id,
+                name: rest.name,
+                slug: convertToSlug(rest.name, rest.id),
+                address: rest.address,
+                city: extractCityFromAddress(rest.address) || "hanoi",
+                district: extractDistrict(rest.address),
+                fullAddress: rest.address,
+                category: rest.category || "food",
+                rating: rest.rating || 4.5,
+                deliveryTime: rest.deliveryTime || "20-30 phút",
+                discount: rest.discount ? rest.discount + "%" : "0%",
+                popular: rest.popular || false,
+                status: rest.status,
+                imageUrl: rest.imageUrl || null
+            }));
+
+            console.log(` Đã tải ${restaurantsData.length} nhà hàng từ database`);
+
+            if (restaurantsData.length === 0) {
+                showNotification(' Hiện chưa có nhà hàng nào đang hoạt động!', 'info');
+                if (grid) {
+                    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;">
+                        <i class="fas fa-store-slash" style="font-size:48px;color:var(--gray);margin-bottom:16px;"></i>
+                        <p style="color:var(--gray);">Chưa có nhà hàng nào</p>
+                        <p style="color:var(--gray);font-size:13px;">Vui lòng quay lại sau!</p>
+                    </div>`;
+                }
+            }
+        } else {
+            console.error("API failed with status:", response.status);
+            restaurantsData = [];
+            showNotification(' Không thể tải danh sách nhà hàng!', 'error');
+        }
+    } catch (error) {
+        console.error("Error loading restaurants:", error);
+        restaurantsData = [];
+        showNotification(' Lỗi kết nối đến server!', 'error');
+    }
+
+    filterAndRender();
+}
+
+function convertToSlug(name, id) {
+    const slug = name.toLowerCase()
+        .replace(/[đ]/g, 'd')
+        .replace(/[^\w\s]/gi, '')
+        .replace(/\s+/g, '-');
+    return `${slug}-${id}`;
+}
+
+function extractCityFromAddress(address) {
+    if (!address) return "hanoi";
+    const lowerAddr = address.toLowerCase();
+    if (lowerAddr.includes('hồ chí minh') || lowerAddr.includes('hcm')) return "hcm";
+    if (lowerAddr.includes('đà nẵng')) return "danang";
+    if (lowerAddr.includes('hải phòng')) return "haiphong";
+    if (lowerAddr.includes('cần thơ')) return "cantho";
+    return "hanoi";
+}
+
+function extractDistrict(address) {
+    if (!address) return "";
+    const allDistricts = [
+        ...districtsByCity.hanoi,
+        ...districtsByCity.hcm,
+        ...districtsByCity.danang,
+        ...districtsByCity.haiphong,
+        ...districtsByCity.cantho
+    ];
+    for (const district of allDistricts) {
+        if (address.includes(district)) return district;
+    }
+    return "";
+}
 
 // ============================================
 // ĐỊNH VỊ
@@ -279,12 +436,8 @@ function loadLocationFromStorage() {
 function updateLocationDisplay() {
     const displaySpan = document.querySelector("#locationDisplay span");
     const locationText = document.querySelector("#selectedLocation");
-    if (displaySpan) {
-        displaySpan.textContent = currentDistrict ? `${currentDistrict}, ${currentCityName}` : currentCityName;
-    }
-    if (locationText) {
-        locationText.textContent = currentDistrict ? `${currentDistrict}, ${currentCityName}` : currentCityName;
-    }
+    if (displaySpan) displaySpan.textContent = currentDistrict ? `${currentDistrict}, ${currentCityName}` : currentCityName;
+    if (locationText) locationText.textContent = currentDistrict ? `${currentDistrict}, ${currentCityName}` : currentCityName;
     filterAndRender();
 }
 
@@ -306,84 +459,112 @@ function filterRestaurants() {
     }
     if (currentSearch) {
         const searchLower = currentSearch.toLowerCase();
-        filtered = filtered.filter(r => r.name.toLowerCase().includes(searchLower) || r.fullAddress.toLowerCase().includes(searchLower));
+        filtered = filtered.filter(r =>
+            r.name.toLowerCase().includes(searchLower) ||
+            (r.fullAddress && r.fullAddress.toLowerCase().includes(searchLower))
+        );
     }
     return filtered;
 }
 
 function getIconForCategory(category) {
-    const icons = { food: "utensils", drink: "mug-hot", vegan: "leaf", cake: "cake-candles", fastfood: "burger", noodle: "bowl-food" };
-    return icons[category] || "store";
+    return categoryIconMap[category] || categoryIconMap.default;
 }
 
 function renderRestaurants() {
     let filtered = filterRestaurants();
     const total = filtered.length;
-    document.getElementById("totalCount").textContent = total;
-    document.getElementById("resultHint").textContent = `Tìm thấy ${total} địa điểm tại ${currentDistrict ? currentDistrict + ", " : ""}${currentCityName}`;
-    
+
+    const totalCountEl = document.getElementById("totalCount");
+    const resultHintEl = document.getElementById("resultHint");
+    if (totalCountEl) totalCountEl.textContent = total;
+    if (resultHintEl) {
+        resultHintEl.textContent = `Tìm thấy ${total} địa điểm tại ${currentDistrict ? currentDistrict + ", " : ""}${currentCityName}`;
+    }
+
     const start = (currentPage - 1) * itemsPerPage;
     const paginated = filtered.slice(start, start + itemsPerPage);
-    const colors = ["#f97316", "#f59e0b", "#8b5cf6", "#10b981", "#3b82f6", "#ef4444"];
-    
+
     const grid = document.getElementById("restaurantGrid");
+    if (!grid) return;
+
     if (paginated.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;"><i class="fas fa-store-slash" style="font-size:48px;color:var(--gray);margin-bottom:16px;"></i><p style="color:var(--gray);">Không tìm thấy địa điểm phù hợp</p></div>`;
-        document.getElementById("pagination").innerHTML = "";
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;">
+            <i class="fas fa-store-slash" style="font-size:48px;color:var(--gray);margin-bottom:16px;"></i>
+            <p style="color:var(--gray);">Không tìm thấy địa điểm phù hợp</p>
+            <p style="color:var(--gray);font-size:13px;">Hãy thử thay đổi bộ lọc hoặc quay lại sau!</p>
+        </div>`;
+        const paginationEl = document.getElementById("pagination");
+        if (paginationEl) paginationEl.innerHTML = "";
         return;
     }
-    
-    grid.innerHTML = paginated.map((r, i) => `
-        <div class="restaurant-card" data-slug="${r.slug}" data-name="${r.name}">
-            <div class="card-img" style="background: linear-gradient(135deg, ${colors[i % colors.length]}, ${colors[(i+2) % colors.length]});">
-                <i class="fas fa-${getIconForCategory(r.category)}"></i>
-                <span class="discount-badge">-${r.discount}</span>
-            </div>
-            <div class="card-content">
-                <h3 class="card-title">${r.name}</h3>
-                <div class="card-address"><i class="fas fa-location-dot"></i> ${r.fullAddress}</div>
-                <div class="card-meta">
-                    <div class="rating"><i class="fas fa-star"></i> ${r.rating}</div>
-                    <div class="delivery-time"><i class="fas fa-motorcycle"></i> ${r.deliveryTime}</div>
+
+    grid.innerHTML = paginated.map(r => {
+        const imageUrl = r.imageUrl ? (r.imageUrl.startsWith('http') ? r.imageUrl : `${SERVER_BASE_URL}${r.imageUrl}`) : null;
+        const categoryIcon = getIconForCategory(r.category);
+        
+        return `
+            <div class="restaurant-card" data-id="${r.id}" data-slug="${r.slug}" data-name="${escapeHtml(r.name)}">
+                <div class="card-img">
+                    ${imageUrl ? 
+                        `<img src="${imageUrl}" alt="${escapeHtml(r.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : 
+                        ''
+                    }
+                    <div class="card-img-placeholder" style="display: ${imageUrl ? 'none' : 'flex'}; width:100%;height:100%;align-items:center;justify-content:center;background: linear-gradient(135deg, var(--primary), #e6492d);">
+                        <i class="fas fa-${categoryIcon}" style="font-size:48px;color:white;"></i>
+                    </div>
+                    ${r.discount !== "0%" ? `<span class="discount-badge">-${r.discount}</span>` : ''}
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">${escapeHtml(r.name)}</h3>
+                    <div class="card-address"><i class="fas fa-location-dot"></i> ${escapeHtml(r.fullAddress || r.address)}</div>
+                    <div class="card-meta">
+                        <div class="rating"><i class="fas fa-star"></i> ${r.rating}</div>
+                        <div class="delivery-time"><i class="fas fa-motorcycle"></i> ${r.deliveryTime}</div>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join("");
-    
+        `;
+    }).join("");
+
     document.querySelectorAll(".restaurant-card").forEach(card => {
         card.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
             if (!isLoggedIn()) {
                 const restaurantName = card.getAttribute('data-name') || 'cửa hàng';
-                showNotification(`🔐 Vui lòng đăng nhập để xem "${restaurantName}"!`, 'error');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 300);
+                showNotification(` Vui lòng đăng nhập để xem "${restaurantName}"!`, 'error');
+                setTimeout(() => { window.location.href = 'login.html'; }, 300);
                 return;
             }
-            
-            const slug = card.getAttribute("data-slug");
-            if (slug) {
-                window.location.href = `${slug}.html`;
-            }
+            const id = card.getAttribute("data-id");
+            if (id) window.location.href = `restaurant.html?id=${id}`;
         });
     });
-    
+
     const totalPages = Math.ceil(total / itemsPerPage);
     renderPagination(totalPages);
+}
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
 }
 
 function renderPagination(totalPages) {
     const paginationDiv = document.getElementById("pagination");
-    if (totalPages <= 1) { paginationDiv.innerHTML = ""; return; }
-    
+    if (!paginationDiv) return;
+
+    if (totalPages <= 1) {
+        paginationDiv.innerHTML = "";
+        return;
+    }
+
     let pages = [];
     for (let i = 1; i <= totalPages; i++) {
         pages.push(`<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`);
     }
     paginationDiv.innerHTML = pages.join("");
+
     document.querySelectorAll(".page-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -404,30 +585,37 @@ function filterAndRender() {
 // ============================================
 function openLocationModal() {
     const modal = document.getElementById("locationModal");
-    modal.classList.add("show");
-    document.body.style.overflow = "hidden";
-    renderCityList();
-    renderDistrictList();
+    if (modal) {
+        modal.classList.add("show");
+        document.body.style.overflow = "hidden";
+        renderCityList();
+        renderDistrictList();
+    }
 }
 
 function closeLocationModal() {
     const modal = document.getElementById("locationModal");
-    modal.classList.remove("show");
-    document.body.style.overflow = "";
+    if (modal) {
+        modal.classList.remove("show");
+        document.body.style.overflow = "";
+    }
 }
 
 function renderCityList() {
     const cityList = document.getElementById("cityList");
+    if (!cityList) return;
+
     cityList.innerHTML = cities.map(city => `
         <div class="location-item ${currentCity === city.id ? 'selected' : ''}" data-city="${city.id}">
             <span>${city.name}</span>
             ${currentCity === city.id ? '<i class="fas fa-check-circle"></i>' : ''}
         </div>
     `).join("");
+
     document.querySelectorAll("[data-city]").forEach(el => {
         el.addEventListener("click", () => {
             currentCity = el.dataset.city;
-            currentCityName = cities.find(c => c.id === currentCity).name;
+            currentCityName = cities.find(c => c.id === currentCity)?.name || "Hà Nội";
             currentDistrict = "";
             renderCityList();
             renderDistrictList();
@@ -439,6 +627,8 @@ function renderCityList() {
 function renderDistrictList() {
     const districts = districtsByCity[currentCity] || [];
     const districtList = document.getElementById("districtList");
+    if (!districtList) return;
+
     districtList.innerHTML = `
         <div class="location-item ${currentDistrict === "" ? 'selected' : ''}" data-district="">
             <span>📌 Tất cả ${currentCityName}</span>
@@ -451,6 +641,7 @@ function renderDistrictList() {
             </div>
         `).join("")}
     `;
+
     document.querySelectorAll("[data-district]").forEach(el => {
         el.addEventListener("click", () => {
             currentDistrict = el.dataset.district;
@@ -467,7 +658,7 @@ function initModal() {
     const confirmBtn = document.getElementById("confirmLocation");
     const useLocationBtn = document.getElementById("useCurrentLocationBtn");
     const searchInput = document.getElementById("locationSearchInput");
-    
+
     if (overlay) overlay.addEventListener("click", closeLocationModal);
     if (closeBtn) closeBtn.addEventListener("click", closeLocationModal);
     if (confirmBtn) confirmBtn.addEventListener("click", () => {
@@ -478,13 +669,12 @@ function initModal() {
     if (useLocationBtn) {
         useLocationBtn.addEventListener("click", () => {
             if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(() => {
-                    showNotification("📍 Đã xác định vị trí gần bạn!", "success");
-                }, () => {
-                    showNotification("⚠️ Không thể xác định vị trí!", "error");
-                });
+                navigator.geolocation.getCurrentPosition(
+                    () => showNotification(" Đã xác định vị trí gần bạn!", "success"),
+                    () => showNotification(" Không thể xác định vị trí!", "error")
+                );
             } else {
-                showNotification("⚠️ Trình duyệt không hỗ trợ định vị!", "error");
+                showNotification(" Trình duyệt không hỗ trợ định vị!", "error");
             }
         });
     }
@@ -494,71 +684,62 @@ function initModal() {
             const districts = districtsByCity[currentCity] || [];
             const filtered = districts.filter(d => d.toLowerCase().includes(keyword));
             const districtList = document.getElementById("districtList");
-            districtList.innerHTML = `
-                <div class="location-item" data-district="">
-                    <span>📌 Tất cả ${currentCityName}</span>
-                </div>
-                ${filtered.map(district => `<div class="location-item" data-district="${district}"><span>📍 ${district}</span></div>`).join("")}
-                ${filtered.length === 0 && keyword ? '<div style="text-align:center;padding:20px;color:var(--gray);">Không tìm thấy</div>' : ''}
-            `;
-            document.querySelectorAll("[data-district]").forEach(el => {
-                el.addEventListener("click", () => {
-                    currentDistrict = el.dataset.district;
-                    renderDistrictList();
-                    updateLocationDisplay();
+            if (districtList) {
+                districtList.innerHTML = `
+                    <div class="location-item" data-district="">
+                        <span>📌 Tất cả ${currentCityName}</span>
+                    </div>
+                    ${filtered.map(district => `<div class="location-item" data-district="${district}"><span> ${district}</span></div>`).join("")}
+                    ${filtered.length === 0 && keyword ? '<div style="text-align:center;padding:20px;color:var(--gray);">Không tìm thấy</div>' : ''}
+                `;
+                document.querySelectorAll("[data-district]").forEach(el => {
+                    el.addEventListener("click", () => {
+                        currentDistrict = el.dataset.district;
+                        renderDistrictList();
+                        updateLocationDisplay();
+                    });
                 });
-            });
+            }
         });
     }
+
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-            document.getElementById(btn.dataset.tab === "city" ? "cityTab" : "districtTab").classList.add("active");
+            const activeTab = document.getElementById(btn.dataset.tab === "city" ? "cityTab" : "districtTab");
+            if (activeTab) activeTab.classList.add("active");
         });
     });
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && modal.classList.contains("show")) closeLocationModal();
-    });
-}
 
-function checkPageAccess() {
-    const currentPage = window.location.pathname.split('/').pop();
-    const isDetailPage = currentPage !== 'user.html' && 
-                         currentPage !== 'login.html' && 
-                         currentPage !== 'cart.html' &&
-                         currentPage !== '' &&
-                         !currentPage.includes('user');
-    
-    if (isDetailPage && !isLoggedIn()) {
-        showNotification('🔐 Vui lòng đăng nhập để xem thông tin cửa hàng!', 'error');
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 300);
-        return false;
-    }
-    return true;
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal && modal.classList.contains("show")) closeLocationModal();
+    });
 }
 
 // ============================================
 // KHỞI TẠO
 // ============================================
-document.addEventListener("DOMContentLoaded", () => {
-    checkPageAccess();
+document.addEventListener("DOMContentLoaded", async () => {
     updateAuthUI();
     initUserDropdown();
     updateCartBadge();
-    
+
     loadLocationFromStorage();
     initModal();
-    document.getElementById("locationSelector")?.addEventListener("click", openLocationModal);
-    
-    document.getElementById("searchInput")?.addEventListener("input", (e) => {
-        currentSearch = e.target.value;
-        filterAndRender();
-    });
-    
+
+    const locationSelector = document.getElementById("locationSelector");
+    if (locationSelector) locationSelector.addEventListener("click", openLocationModal);
+
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            currentSearch = e.target.value;
+            filterAndRender();
+        });
+    }
+
     document.querySelectorAll(".food-category-chip").forEach(chip => {
         chip.addEventListener("click", () => {
             document.querySelectorAll(".food-category-chip").forEach(c => c.classList.remove("active"));
@@ -567,12 +748,14 @@ document.addEventListener("DOMContentLoaded", () => {
             filterAndRender();
         });
     });
-    
-    renderRestaurants();
+
+    //  Đồng bộ avatar từ server (chạy song song, không block load trang)
+    syncUserFromServer();
+
+    // Load nhà hàng từ API (CHỈ TỪ DATABASE, KHÔNG MOCK)
+    await loadRestaurantsFromAPI();
 });
 
 // Export functions
-window.addToCart = addToCart;
-window.isLoggedIn = isLoggedIn;
 window.showNotification = showNotification;
-window.checkAuthAndRedirect = checkAuthAndRedirect;
+window.isLoggedIn = isLoggedIn;

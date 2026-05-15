@@ -195,6 +195,15 @@ body::before {
     color: var(--gray);
 }
 
+/* Hide browser-native password reveal icons */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-textfield-decoration-container,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none !important;
+    visibility: hidden !important;
+}
+
 .toggle-password {
     background: none;
     border: none;

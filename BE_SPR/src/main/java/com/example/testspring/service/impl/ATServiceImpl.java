@@ -17,10 +17,5 @@ public class ATServiceImpl implements ATService {
     public String generateToken(Long accountId) {
         return jwtUtil.generateToken(accountId, Set.of("USER"));
     }
-
-    @Override
-    public Long extractAccountId(String token) {
-        return jwtUtil.getAccountId(token);
-    }
 }
 

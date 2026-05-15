@@ -11,6 +11,8 @@ import lombok.Setter;
 
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -22,6 +24,6 @@ public class RefreshToken {
     private Long id;
     private String token;
     private Long accountId;
-    private Instant expiryDate;
+    private LocalDateTime expiryDate;
     private boolean revoked;
 }
