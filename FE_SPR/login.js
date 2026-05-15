@@ -313,7 +313,7 @@ async function handleForgotPassword() {
         });
         const data = await response.json();
         if (response.ok && data.code === 200) {
-            showToast(`📧 Hướng dẫn đã được gửi đến ${identifier}`);
+            showToast(` Hướng dẫn đã được gửi đến ${identifier}`);
             closeForgotModal();
         } else {
             showToast(data.message || 'Có lỗi xảy ra', 'error');

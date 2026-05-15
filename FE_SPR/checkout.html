@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - SPRFood</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo" onclick="location.href='user.html'">
+                <i class="fas fa-utensil-spoon"></i>
+                <span>SPRFood</span>
+            </div>
+            <div class="header-right">
+                <a href="cart.html" class="btn-back"><i class="fas fa-arrow-left"></i> Quay lại giỏ hàng</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="checkout-container">
+        <div class="container">
+            <h1><i class="fas fa-credit-card"></i> Thanh toán</h1>
+            
+            <div class="checkout-grid">
+                <!-- Form thông tin giao hàng -->
+                <div class="checkout-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> Thông tin giao hàng</h3>
+                        <div class="form-group">
+                            <label>Họ và tên</label>
+                            <input type="text" id="fullName" class="form-input" placeholder="Nhập họ tên">
+                        </div>
+                        <div class="form-group">
+                            <label>Tên tài khoản</label>
+                            <input type="text" id="username" class="form-input" placeholder="Tên tài khoản" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại</label>
+                            <input type="tel" id="phone" class="form-input" placeholder="Nhập số điện thoại">
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ giao hàng</label>
+                            <input type="text" id="address" class="form-input" placeholder="Nhập địa chỉ cụ thể (số nhà, tên đường, phường/xã)">
+                        </div>
+                        <div class="form-group">
+                            <label>Ghi chú (tùy chọn)</label>
+                            <textarea id="note" class="form-input" rows="3" placeholder="Ghi chú cho nhà hàng..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin đơn hàng -->
+                <div class="order-summary">
+                    <h3><i class="fas fa-receipt"></i> Đơn hàng của bạn</h3>
+                    <div class="cart-items" id="cartItems"></div>
+                    <div class="total-row">
+                        <span>Tạm tính:</span>
+                        <span id="subtotal">0₫</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Phí giao hàng:</span>
+                        <span id="shippingFee">25,000₫</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>Tổng cộng:</span>
+                        <span id="grandTotal">0₫</span>
+                    </div>
+                    <button class="btn-confirm" id="confirmOrderBtn">
+                        <i class="fas fa-check-circle"></i> Xác nhận đặt hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal xác nhận địa chỉ -->
+    <div id="addressConfirmModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-marker-alt"></i> Xác nhận địa chỉ giao hàng</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-address-info">
+                    <p><strong><i class="fas fa-user"></i> Người nhận:</strong> <span id="confirmName"></span></p>
+                    <p><strong><i class="fas fa-phone"></i> Số điện thoại:</strong> <span id="confirmPhone"></span></p>
+                    <p><strong><i class="fas fa-location-dot"></i> Địa chỉ giao hàng:</strong></p>
+                    <p class="address-detail" id="confirmAddress"></p>
+                    <div class="warning-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Vui lòng kiểm tra kỹ địa chỉ giao hàng để tránh giao nhầm!</span>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" id="editAddressBtn"><i class="fas fa-edit"></i> Chỉnh sửa</button>
+                    <button class="btn-primary" id="finalConfirmBtn"><i class="fas fa-check"></i> Xác nhận đặt hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span class="toast-message"></span>
+    </div>
+
+    <script src="checkout.js"></script>
+</body>
+</html>

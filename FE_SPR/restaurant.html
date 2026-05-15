@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Chi tiết nhà hàng | SPRFood</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="restaurant.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo-area">
+                <a href="user.html" class="logo">SPRFood</a>
+                <span class="tagline">Giao tận nơi, ngon trọn vị</span>
+            </div>
+            <div class="header-actions">
+                <a href="user.html" class="btn-home">
+                    <i class="fas fa-home"></i> Trang chủ
+                </a>
+                
+                <div id="userSection" class="user-section">
+                    <a href="login.html" class="btn-login" id="loginBtn">
+                        <i class="fas fa-user"></i> Đăng nhập
+                    </a>
+                    <div class="user-dropdown" id="userDropdown" style="display: none;">
+                        <button class="user-avatar" id="userAvatarBtn">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userNameDisplay"></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <a href="profile.html"><i class="fas fa-user"></i> Tài khoản</a>
+                            <a href="order-history.html"><i class="fas fa-clipboard-list"></i> Đơn hàng</a>
+                            <hr>
+                            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="cart.html" class="btn-cart" id="cartBtnLink">
+                    <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNER NHÀ HÀNG - HIỂN THỊ ẢNH TỪ DATABASE -->
+    <div class="restaurant-banner">
+        <img id="restaurantBannerImg" class="restaurant-banner-img" src="" alt="Restaurant banner" style="display: none;">
+        <div class="restaurant-banner-placeholder" style="display: flex;">
+            <i class="fas fa-store"></i>
+        </div>
+    </div>
+
+    <!-- THÔNG TIN NHÀ HÀNG -->
+    <div class="restaurant-info-container">
+        <div class="container">
+            <div class="restaurant-info">
+                <h1 id="restaurantName">Đang tải...</h1>
+                
+                <div class="restaurant-meta">
+                    <div class="meta-item rating">
+                        <i class="fas fa-star"></i>
+                        <span id="restaurantRating">--</span>
+                        <span>(100+ đánh giá)</span>
+                    </div>
+                    <div class="meta-item delivery">
+                        <i class="fas fa-motorcycle"></i>
+                        <span id="restaurantDeliveryTime">--</span>
+                    </div>
+                    <div class="meta-item discount" id="discountBadge" style="display: none;">
+                        <i class="fas fa-tag"></i>
+                        <span id="restaurantDiscount">--</span>
+                    </div>
+                </div>
+                
+                <div class="restaurant-address">
+                    <i class="fas fa-location-dot"></i>
+                    <span id="restaurantAddress">Đang tải...</span>
+                </div>
+                
+                <div class="restaurant-hours">
+                    <i class="fas fa-clock"></i>
+                    <span>Giờ mở cửa • 08:00 - 20:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THỰC ĐƠN -->
+    <main class="menu-section">
+        <div class="container">
+            <div class="menu-header">
+                <h2><i class="fas fa-utensils"></i> Thực đơn</h2>
+                <div class="menu-categories" id="menuCategories">
+                    <button class="category-chip active" data-category="all">🍽️ Tất cả</button>
+                    <button class="category-chip" data-category="main">🍚 Món chính</button>
+                    <button class="category-chip" data-category="appetizer">🥗 Khai vị</button>
+                    <button class="category-chip" data-category="dessert">🍰 Tráng miệng</button>
+                    <button class="category-chip" data-category="drink">🥤 Đồ uống</button>
+                </div>
+            </div>
+            <div class="menu-grid" id="menuGrid">
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Đang tải thực đơn...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL CHỌN SỐ LƯỢNG -->
+    <div id="quantityModal" class="quantity-modal">
+        <div class="quantity-modal-overlay"></div>
+        <div class="quantity-modal-container">
+            <div class="quantity-modal-header">
+                <h3><i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng</h3>
+                <button class="quantity-modal-close">&times;</button>
+            </div>
+            <div class="quantity-modal-body">
+                <div class="selected-item-info">
+                    <div class="selected-item-img" id="selectedItemImg">🍽️</div>
+                    <div>
+                        <p class="selected-item-name" id="selectedItemName">Tên món</p>
+                        <p class="selected-item-price" id="selectedItemPrice">0₫</p>
+                    </div>
+                </div>
+                <div class="quantity-selector">
+                    <label>Số lượng:</label>
+                    <div class="quantity-controls">
+                        <button class="qty-btn qty-minus">-</button>
+                        <span class="qty-value" id="quantityValue">1</span>
+                        <button class="qty-btn qty-plus">+</button>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-cancel-modal">Hủy</button>
+                    <button class="btn-confirm-modal">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>SPRFood</h4>
+                    <p>Mang ẩm thực chất lượng đến mọi nhà với dịch vụ giao hàng nhanh chóng, tận tâm.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liên hệ</h4>
+                    <p><i class="fas fa-phone"></i> 1900 1234</p>
+                    <p><i class="fas fa-envelope"></i> support@sprfood.vn</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Kết nối</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">© 2025 SPRFood</div>
+        </div>
+    </footer>
+
+    <script src="restaurant-detail.js"></script>
+</body>
+</html>

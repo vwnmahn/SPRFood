@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Lịch sử đơn hàng - SPRFood</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="order-history.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="user.html">
+                    <i class="fas fa-utensil-spoon"></i>
+                    <span>SPRFood</span>
+                </a>
+            </div>
+            <nav class="nav-menu">
+                <a href="user.html" class="nav-link">Trang chủ</a>
+                <a href="order-history.html" class="nav-link active">Đơn hàng</a>
+            </nav>
+            <div class="header-actions">
+                <a href="cart.html" class="cart-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+                <div class="user-menu" id="userMenu">
+                    <button class="user-btn" id="userBtn">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userName">Tài khoản</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="profile.html"><i class="fas fa-user"></i> Hồ sơ</a>
+
+                        <hr>
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                    </div>
+                </div>
+                <div class="auth-buttons" id="authButtons">
+                    <button class="btn-outline" id="loginBtn">Đăng nhập</button>
+                    <button class="btn-primary" id="registerBtn">Đăng ký</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-clipboard-list"></i> Lịch sử đơn hàng</h1>
+                <p>Theo dõi trạng thái đơn hàng của bạn</p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="tab-btn active" data-status="all">Tất cả</button>
+                <button class="tab-btn" data-status="pending">Chờ xác nhận</button>
+                <button class="tab-btn" data-status="confirmed">Đã xác nhận</button>
+                <button class="tab-btn" data-status="delivering">Đang giao</button>
+                <button class="tab-btn" data-status="completed">Hoàn thành</button>
+                <button class="tab-btn" data-status="cancelled">Đã hủy</button>
+            </div>
+
+            <!-- Orders List -->
+            <div class="orders-container" id="ordersContainer">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Đang tải đơn hàng...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Order Detail Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3><i class="fas fa-receipt"></i> Chi tiết đơn hàng</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be injected here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="closeModalFooterBtn">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Modal -->
+    <div class="modal" id="cancelModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container modal-sm">
+            <div class="modal-header">
+                <h3><i class="fas fa-times-circle"></i> Hủy đơn hàng</h3>
+                <button class="modal-close" id="closeCancelModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn hủy đơn hàng <strong id="cancelOrderId"></strong>?</p>
+                <div class="form-group">
+                    <label>Lý do hủy (tùy chọn)</label>
+                    <textarea id="cancelReason" rows="3" placeholder="Nhập lý do hủy đơn..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="keepOrderBtn">Giữ đơn</button>
+                <button class="btn-danger" id="confirmCancelBtn">Xác nhận hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon"></span>
+        <span class="toast-message"></span>
+    </div>
+
+    <script src="order-history.js"></script>
+</body>
+</html>

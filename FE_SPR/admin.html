@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | SPRFood</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <div class="admin-container">
+
+        <!-- ========== SIDEBAR ========== -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-utensils"></i>
+                <span>SPRFood Admin</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-tab="orders">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Đơn hàng</span>
+                    <span class="count" id="pendingCount">0</span>
+                </div>
+                <div class="nav-item" data-tab="users">
+                    <i class="fas fa-users"></i>
+                    <span>Người dùng</span>
+                    <span class="count" id="userCount">0</span>
+                </div>
+                <div class="nav-item" data-tab="restaurants">
+                    <i class="fas fa-store"></i>
+                    <span>Nhà hàng</span>
+                </div>
+                <div class="nav-item" data-tab="statistics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-info">
+                    <i class="fas fa-user-shield"></i>
+                    <div>
+                        <p id="adminName">Admin</p>
+                        <small>Quản trị viên</small>
+                    </div>
+                </div>
+                <button class="btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- ========== MAIN CONTENT ========== -->
+        <main class="main-content">
+
+            <!-- Header -->
+            <div class="content-header">
+                <h1 id="pageTitle">Quản lý đơn hàng</h1>
+                <div class="header-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalOrders">0</div>
+                        <div class="stat-label">Tổng đơn</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalRevenue">0₫</div>
+                        <div class="stat-label">Doanh thu</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== TAB: ORDERS ========== -->
+            <div id="ordersTab" class="tab-content active">
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-status="all">Tất cả</button>
+                    <button class="filter-btn" data-status="pending">Chờ xác nhận</button>
+                    <button class="filter-btn" data-status="confirmed">Đã xác nhận</button>
+                    <button class="filter-btn" data-status="delivering">Đang giao</button>
+                    <button class="filter-btn" data-status="completed">Hoàn thành</button>
+                    <button class="filter-btn" data-status="cancelled">Đã hủy</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Nhà hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== TAB: USERS ========== -->
+            <div id="usersTab" class="tab-content">
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-user-status="all">Tất cả</button>
+                    <button class="filter-btn" data-user-status="active">Hoạt động</button>
+                    <button class="filter-btn" data-user-status="locked">Bị khóa</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Địa chỉ</th>
+                                <th>Trạng thái</th>
+                                <th>Role</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="9" class="empty-state">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== TAB: RESTAURANTS ========== -->
+            <div id="restaurantsTab" class="tab-content">
+                <div class="filter-bar-advanced">
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-restaurant-status="all">Tất cả</button>
+                        <button class="filter-btn" data-restaurant-status="active">Hoạt động</button>
+                        <button class="filter-btn" data-restaurant-status="inactive">Tạm dừng</button>
+                    </div>
+                    <div class="search-group">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchRestaurantInput" class="search-input"
+                                placeholder="Tìm nhà hàng...">
+                            <button class="search-btn" id="searchRestaurantBtn">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                        </div>
+                        <button class="filter-btn" id="addRestaurantBtn"
+                            style="background: var(--primary); color: white; border-color: var(--primary);">
+                            <i class="fas fa-plus"></i> Thêm nhà hàng
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nhà hàng</th>
+                                <th>Địa chỉ</th>
+                                <th>Đánh giá</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="restaurantsTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== TAB: STATISTICS ========== -->
+            <div id="statisticsTab" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <div class="stats-icon"><i class="fas fa-receipt"></i></div>
+                        <div class="stats-info">
+                            <h3 id="statTotalOrders">0</h3>
+                            <p>Tổng đơn hàng</p>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="stats-info">
+                            <h3 id="statTotalRevenue">0₫</h3>
+                            <p>Doanh thu (đơn hoàn thành)</p>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-icon"><i class="fas fa-users"></i></div>
+                        <div class="stats-info">
+                            <h3 id="statTotalUsers">0</h3>
+                            <p>Tổng người dùng</p>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-icon"><i class="fas fa-store"></i></div>
+                        <div class="stats-info">
+                            <h3 id="statTotalRestaurants">0</h3>
+                            <p>Tổng nhà hàng</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-pie"></i> Thống kê theo trạng thái đơn hàng</h3>
+                    <div class="status-stats" id="statusStats"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ========== MODAL: ORDER DETAIL ========== -->
+    <div id="orderDetailModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container modal-md">
+            <div class="modal-header">
+                <h3><i class="fas fa-receipt"></i> Chi tiết đơn hàng</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="orderDetailBody"></div>
+            <div class="modal-footer">
+                <button class="filter-btn modal-cancel">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: RESTAURANT FORM ========== -->
+    <div id="restaurantModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="restaurantModalTitle"><i class="fas fa-store"></i> Thêm nhà hàng</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tên nhà hàng *</label>
+                    <input type="text" id="restaurantName" class="form-input" placeholder="Nhập tên nhà hàng">
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ *</label>
+                    <input type="text" id="restaurantAddress" class="form-input" placeholder="Nhập địa chỉ">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex:1">
+                        <label>Đánh giá (0-5)</label>
+                        <input type="number" id="restaurantRating" class="form-input" min="0" max="5" step="0.1"
+                            placeholder="4.5">
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>Giảm giá (%)</label>
+                        <input type="number" id="restaurantDiscount" class="form-input" min="0" max="100"
+                            placeholder="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Thời gian giao hàng</label>
+                    <input type="text" id="restaurantDeliveryTime" class="form-input" placeholder="25-35 phút">
+                </div>
+                <div class="form-group">
+                    <label>Danh mục nhà hàng</label>
+                    <select id="restaurantCategory" class="form-input">
+                        <option value="food">Đồ ăn</option>
+                        <option value="drink">Nước uống</option>
+                        <option value="vegan">Đồ chay</option>
+                        <option value="cake">Bánh kem</option>
+                        <option value="fastfood">Fast food</option>
+                        <option value="noodle">Mì/Phở</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ảnh nhà hàng</label>
+                    <input type="hidden" id="restaurantImageUrl">
+                    <input type="file" id="restaurantImageInput" class="form-input" accept="image/jpeg,image/png">
+                    <div id="restaurantImagePreview" style="display:none; margin-top:10px; position:relative;">
+                        <img id="restaurantPreviewImg" src="" alt="Preview"
+                            style="max-width:100%; border-radius:8px; max-height:160px; object-fit:cover;">
+                        <button id="clearRestaurantImage" type="button"
+                            style="position:absolute;top:6px;right:6px;background:#dc3545;color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:1;">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="filter-btn modal-cancel">Hủy</button>
+                <button class="filter-btn" id="saveRestaurantBtn"
+                    style="background:var(--primary);color:white;border-color:var(--primary);">
+                    <i class="fas fa-save"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: MENU ITEM FORM ========== -->
+    <div id="menuItemModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="menuItemModalTitle"><i class="fas fa-utensils"></i> Thêm món ăn</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="currentRestaurantId">
+                <div class="form-group">
+                    <label>Tên món *</label>
+                    <input type="text" id="menuItemName" class="form-input" placeholder="Nhập tên món ăn">
+                </div>
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea id="menuItemDesc" class="form-input" placeholder="Mô tả món ăn..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex:1">
+                        <label>Giá (₫) *</label>
+                        <input type="number" id="menuItemPrice" class="form-input" min="0" placeholder="50000">
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>Giá gốc (₫)</label>
+                        <input type="number" id="menuItemOldPrice" class="form-input" min="0" placeholder="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Danh mục</label>
+                    <select id="menuItemCategory" class="form-input">
+                        <option value="main">Món chính</option>
+                        <option value="appetizer">Khai vị</option>
+                        <option value="dessert">Tráng miệng</option>
+                        <option value="drink">Đồ uống</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="menuItemPopular"> Món phổ biến 
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Ảnh món ăn</label>
+                    <input type="hidden" id="menuItemImageUrl">
+                    <input type="file" id="menuItemImageInput" class="form-input" accept="image/jpeg,image/png">
+                    <div id="menuItemImagePreview" style="display:none; margin-top:10px; position:relative;">
+                        <img id="menuItemPreviewImg" src="" alt="Preview"
+                            style="max-width:100%; border-radius:8px; max-height:160px; object-fit:cover;">
+                        <button id="clearMenuItemImage" type="button"
+                            style="position:absolute;top:6px;right:6px;background:#dc3545;color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:1;">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="filter-btn modal-cancel">Hủy</button>
+                <button class="filter-btn" id="saveMenuItemBtn"
+                    style="background:var(--primary);color:white;border-color:var(--primary);">
+                    <i class="fas fa-save"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast" style="display:none;"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="admin.js"></script>
+
+</body>
+
+</html>
