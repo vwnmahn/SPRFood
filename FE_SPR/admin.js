@@ -239,7 +239,7 @@ function connectWebSocket() {
             stompClient.subscribe('/topic/new-orders', function(message) {
                 try {
                     const newOrder = JSON.parse(message.body);
-                    showToast(`🆕 Đơn hàng mới #${newOrder.orderCode || newOrder.id}!`, 'success');
+                    showToast(`Đơn hàng mới #${newOrder.orderCode || newOrder.id}!`, 'success');
                     fetchAllOrders();
                 } catch(e) {}
             });
@@ -476,7 +476,7 @@ async function deleteUserById(userId) {
     
     try {
         await apiCall(`/admin/users/${userId}`, { method: 'DELETE' });
-        showToast('🗑️ Đã xóa người dùng thành công!', 'success');
+        showToast(' Đã xóa người dùng thành công!', 'success');
         await fetchUsers();
     } catch (error) {
         showToast('Xóa thất bại!', 'error');
@@ -788,7 +788,7 @@ async function loadMenuItemsForRestaurant(restaurantId, restaurantName) {
         return;
     }
     
-    // ✅ BẢNG KHÔNG CÓ CỘT ẢNH
+    // BẢNG KHÔNG CÓ CỘT ẢNH
     menuContainer.innerHTML = `
         <div class="menu-subtable-wrapper">
             <table class="menu-subtable">
@@ -988,7 +988,7 @@ function renderUsers() {
     }
     
     if (!filteredUsers.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fas fa-users"></i> Không có người dùng nào穷穷';
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fas fa-users"></i> Không có người dùng nào';
         return;
     }
     
@@ -1067,7 +1067,7 @@ function renderRestaurants() {
                 </div>
             </td>
             <td><i class="fas fa-map-marker-alt"></i> ${escapeHtml(rest.address || 'Chưa cập nhật')}</td>
-            <td>⭐ ${rest.rating || 'N/A'}</td>
+            <td> ${rest.rating || 'N/A'}</td>
             <td><span class="status-badge ${isActive ? 'user-active' : 'user-locked'}">${isActive ? ' Hoạt động' : ' Tạm dừng'}</span></td>
             <td>
                 <div class="action-group">
