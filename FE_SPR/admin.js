@@ -153,9 +153,16 @@ function checkLoginAndRedirect() {
         setTimeout(() => window.location.href = 'login.html', 1500);
         return false;
     }
-    
     const roles = user.roles || [];
-    const isAdmin = roles.includes('ROLE_ADMIN') || user.role === 'ADMIN' || user.role === 'ROLE_ADMIN';
+    const isAdmin = 
+    // Trường hợp roles là mảng string: ["ROLE_ADMIN"]
+    roles.includes('ROLE_ADMIN') ||
+    roles.includes('ADMIN') ||
+    // Trường hợp roles là mảng object: [{authority: "ROLE_ADMIN"}]
+    roles.some(r => r?.authority === 'ROLE_ADMIN' || r?.authority === 'ADMIN') ||
+    // Trường hợp role là string đơn
+    user.role === 'ADMIN' ||
+    user.role === 'ROLE_ADMIN';
     
     if (!isAdmin) {
         showToast('Bạn không có quyền truy cập trang này!', 'error');
